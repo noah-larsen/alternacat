@@ -2,7 +2,6 @@ package persistence
 
 import connectedForests.LabeledForest
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
-import utils.JsonFormat
 
 case class PathToIdJsonFormat[N](nodeValueJsonFormat: JsonFormat[N]) extends JsonFormat[Map[Seq[N], Long]] {
 

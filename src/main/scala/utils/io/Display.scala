@@ -1,16 +1,8 @@
-package utils
+package utils.io
 
-import scala.io.StdIn
+object Display {
 
-object IO {
-
-  def clearScreen(): Unit = {
-    val nBlankLines = 100
-    println(System.lineSeparator() * nBlankLines)
-  }
-
-
-  def display(rows: Seq[Seq[String]], header: Seq[String] = Seq(), reverse: Boolean = false): String = {
+  def table(rows: Seq[Seq[String]], header: Seq[String] = Seq(), reverse: Boolean = false): String = {
     val verticalDividerFillCharacter = "-"
     val verticalDividerColumnSeparator = "+"
     val newlineStrings = Seq("\n", "\r\n", "\r")
@@ -31,10 +23,27 @@ object IO {
   }
 
 
-  def promptToPressEnterAndWait(leadWithNewLine: Boolean = true): Unit ={
-    if(leadWithNewLine) println
-    println("Press enter to continue")
-    StdIn.readLine()
+  def withSemicolonSpaces(values: Seq[String]): String = {
+    val separator = ", "
+    values.mkString(separator)
+  }
+
+
+  def withCommaSpaces(values: Seq[String]): String = {
+    val separator = ", "
+    values.mkString(separator)
+  }
+
+
+  def withSpaces(values: Seq[String]): String = {
+    val separator = " "
+    values.mkString(separator)
+  }
+
+
+  def withTabs(values: Seq[String]): String = {
+    val separator = "\t"
+    values.mkString(separator)
   }
 
 }

@@ -2,7 +2,6 @@ package persistence
 
 import connectedForests.LabeledForest
 import play.api.libs.json.{JsValue, Json}
-import utils.JsonFormat
 
 case class LabelToForestAndRelatedNodesJsonFormat[F, N](
                                                          forestLabelJsonFormat: JsonFormat[F],

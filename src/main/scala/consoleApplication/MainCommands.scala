@@ -13,7 +13,6 @@ object MainCommands extends Commands {
   object Connect extends MainCommand(Seq(MaxFinishedValue1To5))
   object Browse extends MainCommand
   object Other extends MainCommand
-  object Save extends MainCommand
   object Quit extends MainCommand
 
 

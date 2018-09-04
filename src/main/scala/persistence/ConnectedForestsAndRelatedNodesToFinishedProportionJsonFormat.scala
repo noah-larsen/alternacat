@@ -2,7 +2,6 @@ package persistence
 
 import connectedForests.ConnectedForests
 import play.api.libs.json.{JsValue, Json}
-import utils.JsonFormat
 
 case class ConnectedForestsAndRelatedNodesToFinishedProportionJsonFormat[F, N](
                                                                                 forestLabelJsonFormat: JsonFormat[F],

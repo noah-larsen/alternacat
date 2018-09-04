@@ -1,7 +1,7 @@
 package consoleApplication
 
-import utils.commands.Parameter.ValueParameter
-import utils.commands.{Parameter, Command, Commands}
+import utils.commands.Parameter.{StringParameter, ValueParameter}
+import utils.commands.{Command, Commands, Parameter}
 import utils.enumerated.Enumerated
 
 object OtherCommands extends Commands {
@@ -13,8 +13,8 @@ object OtherCommands extends Commands {
   object Back extends OtherCommand
 
 
-  object Pathname extends ValueParameter
-  object ForestLabel extends ValueParameter
+  object Pathname extends StringParameter
+  object ForestLabel extends StringParameter
 
 
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[OtherCommands.type], classOf[OtherCommand])

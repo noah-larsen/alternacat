@@ -1,7 +1,6 @@
 package persistence
 
 import play.api.libs.json.{JsValue, Json}
-import utils.JsonFormat
 
 object StringJsonFormat extends JsonFormat[String] {
 

@@ -11,19 +11,23 @@ sealed abstract class Parameter extends SelfNamed(FirstLetterLowercase)
 object Parameter {
 
   abstract class ValueParameter[T](
-                               val parse: String => Try[T] = (x: String) => Try(x.asInstanceOf[T]),
+                               val parse: String => Try[T],
                                val default: Option[T] = None
                              ) extends Parameter
 
 
   abstract class ListParameter[T](
-                                   val parse: Seq[String] => Try[Seq[T]] = (x: Seq[String]) => Try(x.map(_.asInstanceOf[T]))
+                                   val parse: Seq[String] => Try[Seq[T]]
                                  ) extends Parameter
 
 
   abstract class OptionalParameter[T](
-                                       val parse: String => Try[T] = (x: String) => Try(Some(x).asInstanceOf[T])
+                                       val parse: String => Try[T]
                                      ) extends Parameter
 
+
+  abstract class StringParameter(default: Option[String] = None) extends ValueParameter(Try(_), default)
+  abstract class StringsParameter extends ListParameter(Try(_))
+  abstract class OptionalStringParameter extends OptionalParameter(Try(_))
 
 }

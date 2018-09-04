@@ -1,4 +1,4 @@
-package utils
+package persistence
 
 import play.api.libs.json.JsValue
 

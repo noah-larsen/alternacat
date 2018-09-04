@@ -16,11 +16,12 @@ import scala.util.Try
 
 case class LabeledForest[N] private(
                                      private val idToNode: Map[Long, LabeledTreeNode[N]],
-                                     private val labelToRootId: Map[N, Long]
+                                     private val labelToRootId: Map[N, Long],
+                                     private val ramDirectory: RAMDirectory
                                    ) {
 
   def this(){
-    this(Map(), Map())
+    this(Map(), Map(), new RAMDirectory())
   }
 
 
@@ -106,9 +107,10 @@ case class LabeledForest[N] private(
     Try(siblingId(path, label))
       .map(x => new LabeledForest[N](
         LabeledForest.withoutNode(copyChildren(idToNode, idNodeToRelabel, x), idNodeToRelabel),
-        LabeledForest.withoutNode(labelToRootId, idToNode(idNodeToRelabel))
+        LabeledForest.withoutNode(labelToRootId, idToNode(idNodeToRelabel)),
+        ramDirectory
       ))
-      .getOrElse(new LabeledForest[N](relabelIdToNode(idToNode, idNodeToRelabel, label), relabelLabelToRootId(labelToRootId, idNodeToRelabel, label)))
+      .getOrElse(new LabeledForest[N](relabelIdToNode(idToNode, idNodeToRelabel, label), relabelLabelToRootId(labelToRootId, idNodeToRelabel, label), ramDirectory))
 
   }
 
@@ -127,7 +129,8 @@ case class LabeledForest[N] private(
     val rootId = id(path)
     new LabeledForest[N](
       LabeledForest.withoutNode(idToNode, rootId).--(idsSubtree(rootId)),
-      LabeledForest.withoutNode(labelToRootId, idToNode(rootId))
+      LabeledForest.withoutNode(labelToRootId, idToNode(rootId)),
+      ramDirectory
     )
   }
 
@@ -161,7 +164,8 @@ case class LabeledForest[N] private(
           new LabeledForest[N](
             parentId.map(x => labeledForest.idToNode.+(x -> labeledForest.idToNode(x).addChild(subPath.last, subPathId))).getOrElse(labeledForest.idToNode)
               .+(subPathId -> LabeledTreeNode(subPath.last, parentId, Map())),
-            parentId.map(_ => labeledForest.labelToRootId).getOrElse(labeledForest.labelToRootId.+(subPath.last -> id.getOrElse(subPathId)))
+            parentId.map(_ => labeledForest.labelToRootId).getOrElse(labeledForest.labelToRootId.+(subPath.last -> id.getOrElse(subPathId))),
+            ramDirectory
           )
         )
         (labeledForestWithSubpath, id.orElse(Some(subPathId)))
@@ -175,7 +179,6 @@ case class LabeledForest[N] private(
   }
 
 
-  private val ramDirectory = new RAMDirectory()
   private val analyzer = new StandardAnalyzer()
   private val pathStringSeparator = "; "
 

@@ -1,10 +1,10 @@
 package utils.commands
 
-import utils.IO
 import utils.commands.Parameter.{ListParameter, OptionalParameter, ValueParameter}
 import utils.commands.Commands.{CommandException, IncorrectNumberParametersException, InvalidParametersException, UnknownCommandException}
 import utils.commands.IndexedCommand.{IndexCommand, IndexListCommand}
 import utils.enumerated.Enumerated
+import utils.io.IO
 
 import scala.io.StdIn
 import scala.util.{Failure, Success, Try}
@@ -52,25 +52,21 @@ trait Commands extends Enumerated {
 
 
   private def parse[T](line: String, indexedCommandValues: Map[Int, T] = Map(), without: Seq[CommandType] = Seq()): Try[CommandInvocation[CommandType, T]] = {
-
     val whitespaceRe = "\\s+"
     val tokens = line.split(whitespaceRe)
-
-
     letterCommands
       .find(_.letterName.toString == tokens.head).filter(!without.contains(_)).map(CommandInvocation[CommandType, T](_, tokens.tail).validate)
       .orElse(
         indexedCommand.collect {
-          case _: IndexCommand =>
-            indexedCommand.filter(!without.contains(_)).map((_, Try(tokens.head.toInt))).filter(_._2.isSuccess).map(x => (x._1, x._2.get)).filter(x => indexedCommandValues
-              .contains(x._2)).map(x => CommandInvocation(x._1, tokens.tail, Some(indexedCommandValues(x._2))).validate)
-          case _: IndexListCommand =>
-            indexedCommand.filter(!without.contains(_)).map((_, tokens.map(y => Try(y.toInt)))).filter(_._2.forall(_.isSuccess)).map(x => (x._1, x._2.map(_.get))).filter(_._2
-              .forall(x => indexedCommandValues.contains(x))).map(x => Try(CommandInvocation[CommandType, T](x._1, Seq(), None, Some(x._2.map(indexedCommandValues(_))))))
+          case x if x.isInstanceOf[IndexCommand] =>
+            indexedCommand.filter(!without.contains(_)).map((_, Try(tokens.head.toInt))).filter(_._2.isSuccess).map(y => (y._1, y._2.get)).filter(y => indexedCommandValues
+              .contains(y._2)).map(y => CommandInvocation(y._1, tokens.tail, Some(indexedCommandValues(y._2))).validate)
+          case x if x.isInstanceOf[IndexListCommand] =>
+            indexedCommand.filter(!without.contains(_)).map((_, tokens.map(y => Try(y.toInt)))).filter(_._2.forall(_.isSuccess)).map(y => (y._1, y._2.map(_.get))).filter(_._2
+              .forall(y => indexedCommandValues.contains(y))).map(y => Try(CommandInvocation[CommandType, T](y._1, Seq(), None, Some(y._2.map(indexedCommandValues(_))))))
         }.flatten
       )
       .getOrElse(Failure[CommandInvocation[CommandType, T]](UnknownCommandException)).asInstanceOf[Try[CommandInvocation[CommandType, T]]]
-
   }
 
 }

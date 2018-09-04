@@ -1,6 +1,6 @@
 package utils.commands
 
-import utils.IO
+import utils.io.{Display, IO}
 
 sealed trait IndexedCommand extends AbstractCommand {
 
@@ -34,7 +34,7 @@ object IndexedCommand {
 
 
   def display(indexToValue: Map[Int, String], valueHeaderDescription: String, reverse: Boolean = false): String = {
-    IO.display(indexToValue.toSeq.sortBy(_._1).map(x => Seq(x._1.toString, x._2)), Some(valueHeaderDescription).map(Seq(indexSymbol, _)).getOrElse(Seq()), reverse)
+    Display.table(indexToValue.toSeq.sortBy(_._1).map(x => Seq(x._1.toString, x._2)), Some(valueHeaderDescription).map(Seq(indexSymbol, _)).getOrElse(Seq()), reverse)
   }
 
 

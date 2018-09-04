@@ -6,7 +6,6 @@ import connectedForests.{ConnectedForests, DevelopingConnectedForests, LabeledFo
 import org.scalatest.FunSpec
 import persistence.JsonFormatsSpec.IntJsonFormat
 import play.api.libs.json.{JsValue, Json}
-import utils.JsonFormat
 
 class JsonFormatsSpec extends FunSpec with DevelopingConnectedForestsTestData {
 
