@@ -11,8 +11,9 @@ trait Enumerated {
 
 
   def values: Seq[T] = {
-    enumeratedTypes.typeSelf.decls.filter(_.isModule).map(x => u.runtimeMirror(this.getClass.getClassLoader).reflectModule(x.asModule).instance).collect{case x
-      if enumeratedTypes.classT.isInstance(x) => x.asInstanceOf[T]}.toSeq
+    enumeratedTypes.typeSelf.decls.filter(_.isModule).map(x => Try(u.runtimeMirror(this.getClass.getClassLoader).reflectModule(x.asModule))
+      .recover{case e: ScalaReflectionException => u.runtimeMirror(this.getClass.getClassLoader).reflect(this).reflectModule(x.asModule)}
+      .get.instance).collect{case x if enumeratedTypes.classT.isInstance(x) => x.asInstanceOf[T]}.toSeq
   }
 
 
