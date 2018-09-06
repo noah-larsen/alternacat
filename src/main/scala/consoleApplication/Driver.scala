@@ -193,15 +193,17 @@ object Driver extends App {
 
   private def lookupTargetNodes(dcfs: DCFS, sourceForestNode: Seq[String], targestForestNode: Option[Seq[String]] = None): DCFS = {
     val indexToChildrenOrRoots = IndexedCommand.withOneBasedIndexes(targestForestNode.map(dcfs.childPaths(targetForest, _)).getOrElse(dcfs.rootPaths(targetForest)).toSeq)
-    if(indexToChildrenOrRoots.nonEmpty) println(IndexedCommand.display(indexToChildrenOrRoots.mapValues(display(_, targestForestNode.getOrElse(Nil))), targestForestNode
-      .map(_ => NodeTypes.Child.name).getOrElse(NodeTypes.Root.name)))
+    targestForestNode.foreach(x => Some(sourceSubPathAndNonEmptySelectRelatedNodes(dcfs, sourceForestNode, x)).filter(_.nonEmpty).foreach(y => println(display(y))))
+    if(indexToChildrenOrRoots.nonEmpty) println(System.lineSeparator() + IndexedCommand.display(indexToChildrenOrRoots.mapValues(display(_, targestForestNode
+      .getOrElse(Nil))), targestForestNode.map(_ => NodeTypes.Child.name).getOrElse(NodeTypes.Root.name)))
     val displaySourceNodePrefix = "(Source Node: "
     val displaySourceNodeSuffix = ")"
     targestForestNode.foreach(x => println(System.lineSeparator() + display(x)))
     println(System.lineSeparator() + displaySourceNodePrefix + display(sourceForestNode) + displaySourceNodeSuffix)
     val without = Seq(
       (GoUp, targestForestNode.isEmpty),
-      (MarkRelated, targestForestNode.forall(dcfs.relatedNodes(sourceForest, sourceForestNode, targetForest).contains)),
+      (MarkRelated, targestForestNode.forall(dcfs.relatedNodesOfPath(sourceForest, sourceForestNode, targetForest).flatten.contains) || targestForestNode.forall(x => dcfs
+        .relatedNodes(sourceForest, sourceForestNode, targetForest).exists(LabeledForest.subOrSuperPathsOf(x, _)))),
       (RemoveRelatedness, targestForestNode.forall(!dcfs.relatedNodes(sourceForest, sourceForestNode, targetForest).contains(_)))
     ).filter(_._2).map(_._1)
     val commandInvocation = LookupTargetNodesCommands.promptUntilParsed(indexToChildrenOrRoots, without)
@@ -243,8 +245,22 @@ object Driver extends App {
   private def displayRelatedNodes(dcfs: DCFS, sourceForestNode: Seq[String]): String = {
     val indent = "  "
     val noRelatedNodesSymbol = "()"
-    Display.table(LabeledForest.subPaths(sourceForestNode).zip(dcfs.relatedNodesOfPath(sourceForest, sourceForestNode, targetForest)).map(x => Seq(display(x._1)) ++ Some(x._2
-      .map(display(_))).filter(_.nonEmpty).getOrElse(Seq(noRelatedNodesSymbol)).map(indent + _)).flatMap(_.map(Seq(_))))
+    display(LabeledForest.subPaths(sourceForestNode).zip(dcfs.relatedNodesOfPath(sourceForest, sourceForestNode, targetForest)))
+  }
+
+
+  private def sourceSubPathAndNonEmptySelectRelatedNodes(dcfs: DCFS, sourceNode: Seq[String], targetNodeToDisplayOnlySubOrSuperPathsOf: Seq[String]
+                                                           ): Seq[(Seq[String], Set[Seq[String]])] = {
+    LabeledForest.subPaths(sourceNode).zip(dcfs.relatedNodesOfPath(sourceForest, sourceNode, targetForest).map(_.filter(LabeledForest.subOrSuperPathsOf(_,
+      targetNodeToDisplayOnlySubOrSuperPathsOf)))).filter(_._2.nonEmpty)
+  }
+
+
+  private def display(sourceSubPathAndRelatedNodes: Seq[(Seq[String], Set[Seq[String]])]): String = {
+    val indent = "  "
+    val noRelatedNodesSymbol = "()"
+    Display.table(sourceSubPathAndRelatedNodes.map(x => Seq(display(x._1)) ++ Some(x._2.map(display(_))).filter(_.nonEmpty).getOrElse(Seq(noRelatedNodesSymbol)).map(indent +
+      _)).flatMap(_.map(Seq(_))))
   }
 
 
