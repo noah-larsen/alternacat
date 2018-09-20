@@ -1,5 +1,6 @@
 package consoleApplication
 
+import consoleApplication.CommonParameters.PartOfName
 import utils.commands.IndexedCommand.IndexCommand
 import utils.commands.Parameter.{ListParameter, StringsParameter, ValueParameter}
 import utils.commands.{Command, Commands, Parameter}
@@ -13,11 +14,12 @@ object LookupTargetNodesCommands extends Commands {
   object GoUp extends LookupTargetNodesCommand(specifiedLetterName = Some('u'))
   object MarkRelated extends LookupTargetNodesCommand
   object RemoveRelatedness extends LookupTargetNodesCommand
-  object CreateNewTargetNodeHere extends LookupTargetNodesCommand(Seq(PartOfName))
+  object CreateNewTargetRootNode extends LookupTargetNodesCommand(Seq(PartOfName))
+  object CreateNewTargetChildNode extends LookupTargetNodesCommand(Seq(PartOfName))
+  object AbbreviationsForNamingTargetNodes extends LookupTargetNodesCommand
+  object EditName extends LookupTargetNodesCommand
+  object Delete extends LookupTargetNodesCommand
   object Back extends LookupTargetNodesCommand
-
-
-  object PartOfName extends StringsParameter
 
 
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[LookupTargetNodesCommands.type], classOf[LookupTargetNodesCommand])

@@ -35,6 +35,18 @@ object Display {
   }
 
 
+  def withNewlines(values: Seq[String]): String = {
+    val separator = System.lineSeparator()
+    values.mkString(separator)
+  }
+
+
+  def withSpacedArrows(values: Seq[String]): String = {
+    val separator = " -> "
+    values.mkString(separator)
+  }
+
+
   def withSpaces(values: Seq[String]): String = {
     val separator = " "
     values.mkString(separator)
