@@ -23,12 +23,6 @@ object Display {
   }
 
 
-  def withSemicolonSpaces(values: Seq[String]): String = {
-    val separator = ", "
-    values.mkString(separator)
-  }
-
-
   def withCommaSpaces(values: Seq[String]): String = {
     val separator = ", "
     values.mkString(separator)
@@ -41,8 +35,20 @@ object Display {
   }
 
 
+  def withSemicolonSpaces(values: Seq[String]): String = {
+    val separator = ", "
+    values.mkString(separator)
+  }
+
+
   def withSpacedArrows(values: Seq[String]): String = {
     val separator = " -> "
+    values.mkString(separator)
+  }
+
+
+  def withSpacedGreaterThans(values: Seq[String]): String = {
+    val separator = " > "
     values.mkString(separator)
   }
 
