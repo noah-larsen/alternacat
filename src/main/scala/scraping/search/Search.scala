@@ -7,7 +7,7 @@ import net.ruippeixotog.scalascraper.browser.HtmlUnitBrowser
 
 trait Search {
 
-  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int): Seq[URL]
+  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Seq[URL]
 
 
   protected def parse(input: String, precursor: String, successor: String, disqualifyingSubstrings: Seq[String] = Seq()): Seq[String] = {

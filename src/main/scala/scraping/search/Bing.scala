@@ -5,7 +5,7 @@ import net.ruippeixotog.scalascraper.browser.HtmlUnitBrowser
 
 object Bing extends Search {
 
-  override def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int): Seq[URL] = {
+  override def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Seq[URL] = {
 
     def url(firstResultN: Int) = s"https://www.bing.com/search?q=${encodeForUrl(query)}&first=$firstResultN&FORM=PERE"
 
@@ -24,6 +24,7 @@ object Bing extends Search {
       val tagSuffix = ">"
       val linkPrecursor = "<a href=\""
       val linkSuccessor = "\""
+      val adUrlPrefix = "https://www.bing.com/aclick"
       val document = htmlUnitBrowser.get(url(results.length + 1))
       val html = document.toHtml
       val cites = parse(html, precursor, successor).map{
@@ -33,7 +34,7 @@ object Bing extends Search {
           //todo
           println(s"Cannot parse: $x")
           None
-      }.collect{case Some(x) => x}
+      }.collect{case Some(x) if !x.startsWith(adUrlPrefix) || !includeAds => x}
       val links = parse(html, linkPrecursor, linkSuccessor)
       val newResults = cites.map(x => links.filter(y => possibleUrlsWithProtocol(x).exists(y.startsWith))).collect{case x if x.nonEmpty => x.maxBy(_.length)}.map(new URL(_))
       (results ++ newResults).distinct match {

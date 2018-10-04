@@ -53,12 +53,6 @@ object Display {
   }
 
 
-  def withSpacedArrows(values: Seq[String]): String = {
-    val separator = " -> "
-    values.mkString(separator)
-  }
-
-
   def withSpacedGreaterThans(values: Seq[String]): String = {
     val separator = " > "
     values.mkString(separator)

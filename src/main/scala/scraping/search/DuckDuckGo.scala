@@ -7,7 +7,7 @@ import net.ruippeixotog.scalascraper.browser.{Browser, HtmlUnitBrowser}
 
 object DuckDuckGo extends Search {
 
-  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int): Seq[URL] = {
+  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Seq[URL] = {
     val linkPrecursor = "href=\""
     val resultLinkSuccessor = "\"><span class=\"result__url__domain\">"
     val disqualifyingSubstring = ">"
@@ -17,6 +17,7 @@ object DuckDuckGo extends Search {
     //todo
     val html = document.toHtml
     parse(html, linkPrecursor, resultLinkSuccessor, Seq(disqualifyingSubstring)).map(new URL(_)).filter(!_.getHost.contains(disqualifyingHostSubstring))
+    ???
   }
 
 }
