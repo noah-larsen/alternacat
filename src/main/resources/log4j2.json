@@ -1,0 +1,25 @@
+{
+  "configuration": {
+    "name": "Default",
+    "appenders": {
+      "RollingFile": {
+        "name":"File",
+        "fileName":"all.log",
+        "filePattern":"all.log",
+        "PatternLayout": {
+          "pattern":"%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"
+        },
+        "Policies": {
+        }
+      }
+    },
+    "loggers": {
+      "root": {
+        "level":"debug",
+        "appender-ref": {
+          "ref":"File"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+Unopenable Urls:
+
+http://demo.amazonnodes.com/Automotive/5a52526d39587171752b49/RV+Parts+%26+Accessories/4168625869724776684e684f6a67/Appliances%2C+Heating%2C+A%2FC+%26+Ventilation/6c4d6c327073317065686464/
+http://demo.amazonnodes.com/Electronics/3362524564315641/Accessories+%26+Supplies/6565696543737159/Computer+Accessories+%26+Peripherals/4e6b382b522f316b/Cables+%26+Interconnects/634e4c526c665064/PS%2F2+Cables/635334414959366e6b4949513651/
+http://demo.amazonnodes.com/Electronics/3362524564315641/Accessories+%26+Supplies/6565696543737159/Cables/2b657338515546374b3377/Cables+%26+Interconnects/634e4c526c665064/PS%2F2+Cables/635334414959366e6b4949513651/
+http://demo.amazonnodes.com/Electronics/3362524564315641/Computers+%26+Accessories/6d436a6345784339/Computer+Accessories+%26+Peripherals/4e6b382b522f316b/Cables+%26+Interconnects/634e4c526c665064/PS%2F2+Cables/635334414959366e6b4949513651/
+http://demo.amazonnodes.com/Electronics/3362524564315641/Computers+%26+Accessories/6d436a6345784339/Computer+Components/6f4e70546b4d5657322b536f/I%2FO+Port+Cards/584c62547230733046767a624651/
+http://demo.amazonnodes.com/Industrial+%26+Scientific/785939623855733165616b/Industrial+Electrical/2b71477572594e684a494739/Wiring+%26+Connecting/4d457a794c427674466e536a/Cables+%26+Interconnects/634e4c526c665064/PS%2F2+Cables/635334414959366e6b4949513651/
+http://demo.amazonnodes.com/Computers/4b346137396d3867/Computer+Accessories+%26+Peripherals/4e6b382b522f316b/Cables+%26+Interconnects/634e4c526c665064/PS%2F2+Cables/635334414959366e6b4949513651/
+http://demo.amazonnodes.com/Computers/4b346137396d3867/Computer+Components/6f4e70546b4d5657322b536f/I%2FO+Port+Cards/584c62547230733046767a624651/
+http://demo.amazonnodes.com/Pet+Supplies/31463479314c336247422f524151/Dogs/757651656d4a6937565a38386851/Food/6757746c38347736367971394f41/Dehydrated%2FFreeze-Dried/30536664456c325a7259646f3577/
+http://demo.amazonnodes.com/Pet+Supplies/31463479314c336247422f524151/Cats/584973704e39474c626241647277/Food/6757746c38343035357971394f41/Dehydrated%2FFreeze-Dried/30536664456c32647259646f3577/
+http://demo.amazonnodes.com/Tools+%26+Home+Improvement/4679506663425649/Rough+Plumbing/584b2b6271462f2f6b3155/Pipes%2C+Pipe+Fittings+%26+Accessories/6e33722b316c5865484a4a54/Tubing%2FHoses/6c47434d59506173346573307441/
+http://demo.amazonnodes.com/Tools+%26+Home+Improvement/4679506663425649/Rough+Plumbing/584b2b6271462f2f6b3155/Water+Pumps%2C+Parts+%26+Accessories/366a434b6f71556749656a50/Sewage%2FEffluent+Pumps/2b51433852656c4c52735a712f77/
