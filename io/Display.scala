@@ -23,14 +23,32 @@ object Display {
   }
 
 
+  def withColonSpace(value: String): String = {
+    val suffix = ": "
+    value + suffix
+  }
+
+
   def withCommaSpaces(values: Seq[String]): String = {
     val separator = ", "
     values.mkString(separator)
   }
 
 
+  def withNewlines(values: Seq[String]): String = {
+    val separator = System.lineSeparator()
+    values.mkString(separator)
+  }
+
+
   def withSemicolonSpaces(values: Seq[String]): String = {
-    val separator = ", "
+    val separator = "; "
+    values.mkString(separator)
+  }
+
+
+  def withSpacedArrows(values: Seq[String]): String = {
+    val separator = " -> "
     values.mkString(separator)
   }
 
