@@ -3,9 +3,11 @@ import java.net.URL
 
 import net.ruippeixotog.scalascraper.browser.HtmlUnitBrowser
 
-object Bing extends Search {
+import scala.util.Try
 
-  override def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Seq[URL] = {
+object Bing extends SearchEngine {
+
+  override def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Try[Seq[URL]] = Try {
 
     def url(firstResultN: Int) = s"https://www.bing.com/search?q=${encodeForUrl(query)}&first=$firstResultN&FORM=PERE"
 

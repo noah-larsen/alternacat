@@ -5,9 +5,11 @@ import java.nio.charset.StandardCharsets
 
 import net.ruippeixotog.scalascraper.browser.{Browser, HtmlUnitBrowser}
 
-object DuckDuckGo extends Search {
+import scala.util.Try
 
-  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Seq[URL] = {
+object DuckDuckGo extends SearchEngine {
+
+  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Try[Seq[URL]] = Try {
     val linkPrecursor = "href=\""
     val resultLinkSuccessor = "\"><span class=\"result__url__domain\">"
     val disqualifyingSubstring = ">"

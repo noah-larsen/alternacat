@@ -5,9 +5,11 @@ import java.nio.charset.StandardCharsets
 
 import net.ruippeixotog.scalascraper.browser.HtmlUnitBrowser
 
-trait Search {
+import scala.util.Try
 
-  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Seq[URL]
+trait SearchEngine {
+
+  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Try[Seq[URL]]
 
 
   protected def parse(input: String, precursor: String, successor: String, disqualifyingSubstrings: Seq[String] = Seq()): Seq[String] = {
