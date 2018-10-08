@@ -5,9 +5,9 @@ import net.ruippeixotog.scalascraper.browser.HtmlUnitBrowser
 
 import scala.util.Try
 
-object Bing extends SearchEngine {
+case class Bing(includeAds: Boolean = false) extends SearchEngine {
 
-  override def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Try[Seq[URL]] = Try {
+  override def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int): Try[Seq[URL]] = Try {
 
     def url(firstResultN: Int) = s"https://www.bing.com/search?q=${encodeForUrl(query)}&first=$firstResultN&FORM=PERE"
 

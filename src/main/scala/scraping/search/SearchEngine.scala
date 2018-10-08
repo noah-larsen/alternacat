@@ -9,7 +9,7 @@ import scala.util.Try
 
 trait SearchEngine {
 
-  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int, includeAds: Boolean = false): Try[Seq[URL]]
+  def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int): Try[Seq[URL]]
 
 
   protected def parse(input: String, precursor: String, successor: String, disqualifyingSubstrings: Seq[String] = Seq()): Seq[String] = {
