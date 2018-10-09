@@ -1,0 +1,1 @@
+sbt "run -s amazon -t why -p io/persistence/dcfs.json -a"

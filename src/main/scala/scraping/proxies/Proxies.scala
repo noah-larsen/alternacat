@@ -3,7 +3,6 @@ package scraping.proxies
 import java.net.InetSocketAddress
 
 import com.gargoylesoftware.htmlunit.ProxyConfig
-import com.sun.deploy.net.proxy.ProxyUtils
 import net.ruippeixotog.scalascraper.browser.{HtmlUnitBrowser, JsoupBrowser}
 
 import scala.util.Try

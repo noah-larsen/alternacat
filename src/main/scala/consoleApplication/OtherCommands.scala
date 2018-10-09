@@ -9,7 +9,7 @@ object OtherCommands extends Commands {
   override type CommandType = OtherCommand
   sealed abstract class OtherCommand(parameters: Seq[Parameter] = Seq()) extends Command(parameters)
 
-  object InitializeGoogleProductTaxonomy extends OtherCommand(Seq(Pathname, ForestLabel))
+  object InitializeProductTaxonomy extends OtherCommand(Seq(Pathname, ForestLabel))
   object Back extends OtherCommand
 
 

@@ -15,13 +15,13 @@ import consoleApplication.ConnectSourceNodesSelectionCommands.{SelectAll, Select
 import consoleApplication.Driver.ForestTypes
 import consoleApplication.Driver.ForestTypes.ForestType
 import consoleApplication.EditNameCommands.Edit
-import consoleApplication.OtherCommands.{ForestLabel, InitializeGoogleProductTaxonomy, Pathname}
+import consoleApplication.OtherCommands.{ForestLabel, InitializeProductTaxonomy, Pathname}
 import consoleApplication.MainCommands._
 import consoleApplication.SearchResultCommands.GoToResultNumber
 import org.rogach.scallop.{ScallopConf, ScallopOption}
 import persistence.{ConnectedForestsAndRelatedNodesToFinishedProportionJsonFormat, PathToIdJsonFormat, StringJsonFormat}
 import play.api.libs.json.Json
-import taxonomies.GoogleProductTaxonomy
+import taxonomies.ProductTaxonomy
 import utils.commands.{Command, CommandInvocation, Commands, IndexedCommand}
 import utils.commands.Parameter.ListParameter
 import utils.enumerated.{Enumerated, SelfNamed}
@@ -175,9 +175,9 @@ object Driver extends App {
     val commandInvocation = OtherCommands.promptUntilParsed()
     log(commandInvocation)
     commandInvocation.command match {
-      case InitializeGoogleProductTaxonomy =>
+      case InitializeProductTaxonomy =>
         val forestLabel = commandInvocation.value(ForestLabel)
-        other(dcfs.withForest(forestLabel).withPaths(forestLabel, GoogleProductTaxonomy(commandInvocation.value(Pathname)).labeledForest.paths))
+        other(dcfs.withForest(forestLabel).withPaths(forestLabel, ProductTaxonomy.parseFromGreaterThanSeparatedFile(commandInvocation.value(Pathname)).labeledForest.paths))
       case OtherCommands.Back =>
         if(autoSave) save(dcfs)
         dcfs

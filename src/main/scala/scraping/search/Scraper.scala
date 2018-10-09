@@ -4,6 +4,9 @@ import java.net.URL
 
 import net.ruippeixotog.scalascraper.browser.HtmlUnitBrowser
 import net.ruippeixotog.scalascraper.browser.HtmlUnitBrowser.HtmlUnitDocument
+import net.ruippeixotog.scalascraper.dsl.DSL._
+import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
+import net.ruippeixotog.scalascraper.dsl.DSL.Parse._
 
 import scala.collection.immutable.HashMap
 import scala.util.{Random, Try}
@@ -21,8 +24,13 @@ case class Scraper(
   }
 
 
-  def scrape[T](queries: Seq[String], resultF: HtmlUnitDocument => T): Try[Seq[Seq[Try[T]]]] = {
+  def scrapeDocuments[T](queries: Seq[String], resultF: HtmlUnitDocument => T): Try[Seq[Seq[Try[T]]]] = {
     scrape(queries, (x, y) => resultF(y.get(x.toString)))
+  }
+
+
+  def scrapeText[T](queries: Seq[String], resultF: String => T): Try[Seq[Seq[Try[T]]]] = {
+    scrapeDocuments(queries, (x: HtmlUnitDocument) => resultF(x >> allText))
   }
 
 
