@@ -5,7 +5,7 @@ import utils.enumerated.SelfNamed.NameFormats._
 
 trait SelfNameable {
 
-  def name(nameFormat: NameFormat): String = {
+  protected def name(nameFormat: NameFormat): String = {
 
     def withCaseFormat(name: String, caseFormat: CaseFormat): String = {
       caseFormat match {
@@ -22,11 +22,10 @@ trait SelfNameable {
     }
 
 
-    val multipleClassNameAddedDisambiguationSymbol = "$"
     val classNameSeparatorRE = "[.$]"
     val space = " "
     val underscore = "_"
-    val objectName = getClass.getName.split(classNameSeparatorRE).filter(_.nonEmpty).last
+    val objectName = getClass.getName.split(classNameSeparatorRE).filter(_.headOption.exists(!_.isDigit)).last
     nameFormat match {
       case Custom(x) => x
       case ObjectName(x) => withCaseFormat(objectName, x)
