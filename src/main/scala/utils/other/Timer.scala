@@ -26,11 +26,9 @@ case class Timer(private val prefix: String = new String) {
 
     def asSuffix(chronoUnit: ChronoUnit): String = {
       chronoUnit match {
-        case ChronoUnit.DAYS => "d"
-        case ChronoUnit.HOURS => "h"
-        case ChronoUnit.MINUTES => "m"
-        case ChronoUnit.SECONDS => "s"
-        case _ => s" ${chronoUnit.name().toLowerCase}"
+        case x if Seq(ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS).contains(x) => x.name().headOption.map(_.toLower.toString).getOrElse(new
+            String)
+        case _ => Display.withSpaces(Seq(new String, chronoUnit.name().toLowerCase))
       }
     }
 
@@ -66,7 +64,7 @@ case class Timer(private val prefix: String = new String) {
 
 
     val duration = Duration.ofNanos(nanos)
-    val relevantChronoUnits = Some(chronoUnits.sorted.reverse.filter(convert(duration, _) > 0).take(maxNRelevantUnits)).getOrElse(Seq(ChronoUnit.NANOS))
+    val relevantChronoUnits = Some(chronoUnits.sorted.reverse.filter(convert(duration, _) > 0).take(maxNRelevantUnits)).getOrElse(Seq(chronoUnits.last))
     relevantChronoUnits.tail.scanLeft((nanos, convert(duration, relevantChronoUnits.head), relevantChronoUnits.head))((x, y) => nanos - Duration.of(x._2, x._3).toNanos match {
       case z => (z, convert(Duration.ofNanos(z), y), y)}).map(x => (x._2, x._3))
 
