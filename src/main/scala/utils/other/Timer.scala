@@ -24,24 +24,27 @@ case class Timer(private val prefix: String = new String) {
 
   private def display(nanos: Long, maxNRelevantUnits: Int): String = {
 
-    def display(chronoUnit: ChronoUnit): String = {
+    def asSuffix(chronoUnit: ChronoUnit): String = {
       chronoUnit match {
         case ChronoUnit.DAYS => "d"
         case ChronoUnit.HOURS => "h"
         case ChronoUnit.MINUTES => "m"
         case ChronoUnit.SECONDS => "s"
-        case ChronoUnit.MILLIS => "ms"
-        case _ => chronoUnit.name().toLowerCase
+        case _ => s" ${chronoUnit.name().toLowerCase}"
       }
     }
 
 
-    val chronoUnits = Seq(ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS, ChronoUnit.MILLIS)
     def toSeconds(value: Long, units: ChronoUnit): Double = units.getDuration.multipliedBy(value).toNanos.toDouble / TimeUnit.SECONDS.toNanos(1)
+    def format(value: Double, nSignificantDigits: Int): String = value.toString match {case x => Some(x.indexWhere(!_.isDigit)).filter(_ != -1).map(y => x.take(y) + x
+      .substring(y).take(nSignificantDigits + 1)).getOrElse(x)}
+    def sumSeconds(values: Seq[(Long, ChronoUnit)]): Double = values.foldLeft(0.0)((x, y) => x + toSeconds(y._1, y._2))
+    val chronoUnits = Seq(ChronoUnit.DAYS, ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS, ChronoUnit.MILLIS)
+    val nSignificantDigits = 2
     convert(nanos, chronoUnits, maxNRelevantUnits) match {
-      case x if x.headOption.exists(_._2 == ChronoUnit.SECONDS) && x.length > 1 => toSeconds(x.head._1, x.head._2) + toSeconds(x.tail.head._1, x.tail.head._2) + display(
-        ChronoUnit.SECONDS)
-      case x => Display.withSpaces(x.map(y => y._1.toString + display(y._2)))
+      case x if x.headOption.exists(_._2 == ChronoUnit.SECONDS) => x.head._1 + asSuffix(x.head._2)
+      case x if x.headOption.exists(_._2.compareTo(ChronoUnit.SECONDS) < 0) => format(sumSeconds(x), nSignificantDigits) + asSuffix(ChronoUnit.SECONDS)
+      case x => Display.withSpaces(x.map(y => y._1.toString + asSuffix(y._2)))
     }
 
   }
@@ -56,6 +59,7 @@ case class Timer(private val prefix: String = new String) {
         case ChronoUnit.MINUTES => duration.toMinutes
         case ChronoUnit.SECONDS => duration.getSeconds
         case ChronoUnit.MILLIS => duration.toMillis
+        case ChronoUnit.NANOS => duration.toMillis
         case _ => duration.get(chronoUnit)
       }
     }
