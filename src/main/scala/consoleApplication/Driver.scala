@@ -177,10 +177,11 @@ object Driver extends App {
     commandInvocation.command match {
       case InitializeProductTaxonomy =>
         val forestLabel = commandInvocation.value(ForestLabel)
-        other(dcfs.withForest(forestLabel).withPaths(forestLabel, ProductTaxonomy.parseFromGreaterThanSeparatedFile(commandInvocation.value(Pathname)).labeledForest.paths))
-      case OtherCommands.Back =>
-        if(autoSave) save(dcfs)
-        dcfs
+        val initializedDcfs = dcfs.withForest(forestLabel).withPaths(forestLabel, ProductTaxonomy.parseFromGreaterThanSeparatedFile(commandInvocation.value(Pathname))
+          .labeledForest.paths)
+        if(autoSave) save(initializedDcfs)
+        other(initializedDcfs)
+      case OtherCommands.Back => dcfs
     }
   }
 
