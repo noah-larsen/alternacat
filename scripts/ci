@@ -1,0 +1,2 @@
+gcloud compute instances start instance-1 --zone=us-east1-b
+gcloud compute --project "soy-transducer-218820" ssh --zone "us-east1-b" "instance-1"
