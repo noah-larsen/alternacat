@@ -1,1 +1,3 @@
-sbt "run -s amazon -t why -p io/persistence/dcfs.json -a"
+#!/usr/bin/env bash
+path="$HOME/code/alternacat"
+(cd $path && sbt --warn "run -s amazon -t why -p io/persistence/dcfs.json -a")
