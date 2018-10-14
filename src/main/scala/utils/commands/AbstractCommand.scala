@@ -26,10 +26,11 @@ abstract class AbstractCommand(parameters_ : Seq[Parameter]) extends SelfNamed(O
     val listParameterSuffix = " ..."
     val unrequiredParameterPrefix = "["
     val defaultParameterNameDefaultValueSeparator = " = "
+    val optionParameterPrefix = "-"
     val optionParameterLetterNameSeparator = " - "
     val unrequiredParameterSuffix = "]"
     nameSymbol + nameSymbolNameSeparator + name + parameters.headOption.map(_ => descriptionParametersSeparator + parameters.map {
-      case x: OptionParameter => unrequiredParameterPrefix + x.letter + optionParameterLetterNameSeparator + x.name + unrequiredParameterSuffix
+      case x: OptionParameter => unrequiredParameterPrefix + optionParameterPrefix + x.letter + optionParameterLetterNameSeparator + x.name + unrequiredParameterSuffix
       case x: ValueParameter[_] => x.default.map(unrequiredParameterPrefix + x.name + defaultParameterNameDefaultValueSeparator + _ + unrequiredParameterSuffix).getOrElse(x
         .name)
       case x: OptionalParameter[_] => unrequiredParameterPrefix + x.name + unrequiredParameterSuffix
