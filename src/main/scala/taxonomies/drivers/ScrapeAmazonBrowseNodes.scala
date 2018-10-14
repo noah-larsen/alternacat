@@ -3,6 +3,7 @@ package taxonomies.drivers
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+import scraping.crawling.WebsiteCrawler
 import utils.io.{Display, IO}
 
 
@@ -11,7 +12,7 @@ object ScrapeAmazonBrowseNodes extends App {
   val outputPathname = "io/taxonomies/amazonBrowseNodes.txt"
   val substringsUrlsToNotOpenLinksOf = Seq("C%23/4163516b6634634e", "C%23/427373716534514e3162532b4b7663")
   val urlSeparator = "/"
-  val documents = utils_.WebsiteCrawler.crawl(url, url, substringsUrlsToNotOpenLinksOf = substringsUrlsToNotOpenLinksOf)
+  val documents = WebsiteCrawler.crawl(url, url, substringsUrlsToNotOpenLinksOf = substringsUrlsToNotOpenLinksOf)
   val unopenableUrls = documents.collect{case Right(x) => x.toString}
   if(unopenableUrls.nonEmpty){
     println(System.lineSeparator() + "Error Urls:" + System.lineSeparator())

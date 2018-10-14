@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+args=$@
+path="$HOME/code/alternacat"
+(cd $path && sbt --warn "run-main taxonomies.drivers.Search $args")

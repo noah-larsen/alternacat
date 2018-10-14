@@ -26,8 +26,11 @@ trait SearchEngine {
     }).getOrElse(Seq())
   }
 
+}
 
-  protected def encodeForUrl(value: String): String = {
+object SearchEngine {
+
+  def encodeForUrl(value: String): String = {
     URLEncoder.encode(value, StandardCharsets.UTF_8.name())
   }
 

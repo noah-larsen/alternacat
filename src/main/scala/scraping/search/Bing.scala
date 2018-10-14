@@ -9,7 +9,7 @@ case class Bing(includeAds: Boolean = false) extends SearchEngine {
 
   override def search(htmlUnitBrowser: HtmlUnitBrowser, query: String, maxNResults: Int): Try[Seq[URL]] = Try {
 
-    def url(firstResultN: Int) = s"https://www.bing.com/search?q=${encodeForUrl(query)}&first=$firstResultN&FORM=PERE"
+    def url(firstResultN: Int) = s"https://www.bing.com/search?q=${SearchEngine.encodeForUrl(query)}&first=$firstResultN&FORM=PERE"
 
 
     def possibleUrlsWithProtocol(uri: String): Seq[String] = {
