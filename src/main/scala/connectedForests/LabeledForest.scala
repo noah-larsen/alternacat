@@ -125,6 +125,23 @@ case class LabeledForest[N] private(
   }
 
 
+  def withSubtreeMoved(path: Seq[N], pathNewParent: Option[Seq[N]]): LabeledForest[N] = {
+    val idSubroot = id(path)
+    val subroot = idToNode(idSubroot)
+    //current parent, if exists, disconnect
+    //if currently a root, remove from roots ****
+    //if new parent exists, add to children
+    //if no new parent, add to roots
+    if(pathNewParent.exists(_.startsWith(path))) throw new RuntimeException //todo
+    if(pathNewParent.exists(children(_).contains(path.last))) throw new RuntimeException //todo
+    if(pathNewParent.isEmpty && roots.contains(path.last)) throw new RuntimeException //todo
+    val newIdToNode = subroot.parentId.map(x => idToNode + (id(x) -> idToNode(x).removeChild(path.last))).getOrElse(idToNode) match {case x => pathNewParent.map(y => x + (id(
+      y) -> x(id(y)).addChild(path.last, idSubroot))).getOrElse(x)}
+//    val newLabelToRootId = if(pathNewParent.isEmpty) labelToRootId + (path.last -> idSubroot)
+    ???
+  }
+
+
   def withoutSubtree(path: Seq[N]): LabeledForest[N] = {
     val rootId = id(path)
     new LabeledForest[N](

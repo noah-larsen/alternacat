@@ -138,6 +138,16 @@ class LabeledForestSpec extends FunSpec with LabeledForestTestData {
     }
 
 
+    describe("withSubtreeMoved"){
+      it("should move an existing subtree to the child of an existing path outside of the subtree to move if a child does not already exist with the same name"){
+
+      }
+      it("should move an existing subtree to a root if a root does not already exist with the same name"){
+
+      }
+    }
+
+
     describe("withoutSubtree"){
       it("should return a copy of the forest without the subtree"){
         paths.foreach{path =>
