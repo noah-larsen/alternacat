@@ -6,7 +6,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.document.Field.Store
 import org.apache.lucene.document.{Document, TextField}
 import org.apache.lucene.index.IndexWriterConfig.OpenMode
-import org.apache.lucene.index.{DirectoryReader, IndexWriter, IndexWriterConfig}
+import org.apache.lucene.index.{DirectoryReader, IndexWriter, IndexWriterConfig, Term}
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.{IndexSearcher, MatchNoDocsQuery, Query}
 import org.apache.lucene.store.RAMDirectory
@@ -14,7 +14,7 @@ import utils.enumerated.{Enumerated, SelfNamed}
 
 import scala.util.Try
 
-case class LabeledForest[N] private(
+class LabeledForest[N] private(
                                      private val idToNode: Map[Long, LabeledTreeNode[N]],
                                      private val labelToRootId: Map[N, Long],
                                      private val ramDirectory: RAMDirectory
@@ -33,6 +33,14 @@ case class LabeledForest[N] private(
   def distance(path1: Seq[N], path2: Seq[N]): Option[Int] = {
     def lowestCommonAncestor(path1: Seq[N], path2: Seq[N]): Seq[N] = path1.zip(path2).takeWhile(x => x._1 == x._2).map(_._1)
     Some(lowestCommonAncestor(path1, path2).length).filter(_ > 0).map(x => path1.length - x + path2.length - x)
+  }
+
+
+  override def equals(obj: scala.Any): Boolean = {
+    obj match {
+      case x: LabeledForest[N] => idToNode == x.idToNode && labelToRootId == x.labelToRootId
+      case _ => false
+    }
   }
 
 
@@ -128,27 +136,25 @@ case class LabeledForest[N] private(
   def withSubtreeMoved(path: Seq[N], pathNewParent: Option[Seq[N]]): LabeledForest[N] = {
     val idSubroot = id(path)
     val subroot = idToNode(idSubroot)
-    //current parent, if exists, disconnect
-    //if currently a root, remove from roots ****
-    //if new parent exists, add to children
-    //if no new parent, add to roots
     if(pathNewParent.exists(_.startsWith(path))) throw new RuntimeException //todo
     if(pathNewParent.exists(children(_).contains(path.last))) throw new RuntimeException //todo
     if(pathNewParent.isEmpty && roots.contains(path.last)) throw new RuntimeException //todo
-    val newIdToNode = subroot.parentId.map(x => idToNode + (id(x) -> idToNode(x).removeChild(path.last))).getOrElse(idToNode) match {case x => pathNewParent.map(y => x + (id(
+    val newIdToNode = subroot.parentId.map(x => idToNode + (x -> idToNode(x).removeChild(path.last))).getOrElse(idToNode) match {case x => pathNewParent.map(y => x + (id(
       y) -> x(id(y)).addChild(path.last, idSubroot))).getOrElse(x)}
-//    val newLabelToRootId = if(pathNewParent.isEmpty) labelToRootId + (path.last -> idSubroot)
-    ???
+    val newLabelToRootId = (if(path.length == 1) labelToRootId - path.last else labelToRootId) match {case x => if(pathNewParent.isEmpty) x + (path.last -> idSubroot) else x}
+    try LabeledForest(newIdToNode, newLabelToRootId, ramDirectory)
+    finally removePathsFromIndex(Seq(path))
   }
 
 
   def withoutSubtree(path: Seq[N]): LabeledForest[N] = {
     val rootId = id(path)
-    new LabeledForest[N](
+    try LabeledForest[N](
       LabeledForest.withoutNode(idToNode, rootId).--(idsSubtree(rootId)),
       LabeledForest.withoutNode(labelToRootId, idToNode(rootId)),
       ramDirectory
     )
+    finally removePathsFromIndex(pathsSubtree(path))
   }
 
 
@@ -212,6 +218,13 @@ case class LabeledForest[N] private(
   }
 
 
+  private def removePathsFromIndex(paths: Iterable[Seq[N]]): Unit = {
+    val indexWriter = new IndexWriter(ramDirectory, new IndexWriterConfig(analyzer))
+    paths.foreach(x =>indexWriter.deleteDocuments(new Term(Fields.Id.name, id(x).toString)))
+    indexWriter.close()
+  }
+
+
   def resultPathToNormalizedScore(query: String, maxNResults: Integer, fields: Seq[Field] = Fields.values): Map[Seq[N], Double] = {
     val directoryReader = DirectoryReader.open(ramDirectory)
     try {
@@ -244,6 +257,11 @@ case class LabeledForest[N] private(
 }
 
 object LabeledForest {
+
+  def apply[N](idToNode: Map[Long, LabeledTreeNode[N]], labelToRootId: Map[N, Long], ramDirectory: RAMDirectory): LabeledForest[N] = {
+    new LabeledForest(idToNode, labelToRootId, ramDirectory)
+  }
+
 
   def apply[N](paths: Iterable[Seq[N]] = Iterable[Seq[N]]()): LabeledForest[N] = {
     new LabeledForest().withPaths(paths)

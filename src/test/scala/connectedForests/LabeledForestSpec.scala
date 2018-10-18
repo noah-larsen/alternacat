@@ -143,7 +143,12 @@ class LabeledForestSpec extends FunSpec with LabeledForestTestData {
 
       }
       it("should move an existing subtree to a root if a root does not already exist with the same name"){
-
+        paths.filter(x => !labeledForest.roots.contains(x.last)).foreach{path =>
+          val withSubtreeMoved = labeledForest.withSubtreeMoved(path, None)
+          assert(withSubtreeMoved.paths.contains(Seq(path.last)))
+          assert(withSubtreeMoved.roots.contains(path.last))
+          assert(!withSubtreeMoved.paths.contains(path))
+        }
       }
     }
 
