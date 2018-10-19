@@ -21,7 +21,7 @@ abstract class SelfDescribed(
 
 
   override def getMessage: String = {
-    Display.withColonSpace(name(ObjectNameWithSpacesBetweenWords())) + Display.withSemicolonSpaces((parameters ++ cause.filter(_ => !includeCauseMessage).map(x => Seq(Seq(x.getMessage))).getOrElse(Seq(Seq()))).map(Display.withCommaSpaces))
+    Display.withColonSpace(name(ObjectNameWithSpacesBetweenWords())) + Display.withSemicolonSpaces(cause.filter(_ => !includeCauseMessage).map(x => parameters ++ Seq(Seq(x.getMessage))).getOrElse(parameters).map(Display.withCommaSpaces))
   }
 
 }
