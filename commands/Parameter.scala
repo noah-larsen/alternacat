@@ -26,6 +26,11 @@ object Parameter {
                                      ) extends Parameter
 
 
+  abstract class OptionParameter(
+                                  val letter: Char
+                                ) extends Parameter
+
+
   abstract class StringParameter(default: Option[String] = None) extends ValueParameter(Try(_), default)
   abstract class StringsParameter extends ListParameter(Try(_))
   abstract class OptionalStringParameter extends OptionalParameter(Try(_))

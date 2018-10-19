@@ -17,8 +17,10 @@ trait Enumerated {
   }
 
 
-  def withName(name: String, ignoreCase: Boolean = true): Option[T] = {
-    values.find(x => if(ignoreCase) x.name.equalsIgnoreCase(name) else x.name == name)
+  def withName(name: String, ignoreCase: Boolean = true, normalizeSpaceChars: Boolean = true, trim: Boolean = true): Option[T] = {
+    val normalSpace = " "
+    def process(value: String) = Some(value).map(x => if(ignoreCase) x.toLowerCase else x).map(x => if(normalizeSpaceChars) x.map(y => if(y.isSpaceChar) normalSpace else y).mkString else x).map(x => if(trim) x.trim else x).get
+    values.find(x => process(x.name) == process(name))
   }
 
 
