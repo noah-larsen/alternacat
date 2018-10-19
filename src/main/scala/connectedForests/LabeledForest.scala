@@ -137,24 +137,26 @@ class LabeledForest[N] private(
     val idSubroot = id(path)
     val subroot = idToNode(idSubroot)
     if(pathNewParent.exists(_.startsWith(path))) throw new RuntimeException //todo
-    if(pathNewParent.exists(children(_).contains(path.last))) throw new RuntimeException //todo
-    if(pathNewParent.isEmpty && roots.contains(path.last)) throw new RuntimeException //todo
-    val newIdToNode = subroot.parentId.map(x => idToNode + (x -> idToNode(x).removeChild(path.last))).getOrElse(idToNode) match {case x => pathNewParent.map(y => x + (id(
-      y) -> x(id(y)).addChild(path.last, idSubroot))).getOrElse(x)}
+    if(pathNewParent.exists(children(_).contains(path.last)) && !pathNewParent.contains(path.init)) throw new RuntimeException //todo
+    if(pathNewParent.isEmpty && roots.contains(path.last) && path.length != 1) throw new RuntimeException //todo
+    val newIdToNode = (subroot.parentId.map(x => idToNode + (x -> idToNode(x).removeChild(path.last))).getOrElse(idToNode) match {case x => pathNewParent.map(y => x + (id(
+      y) -> x(id(y)).addChild(path.last, idSubroot))).getOrElse(x)}) match {case x => x + (idSubroot -> x(idSubroot).withParent(pathNewParent.map(id)))}
     val newLabelToRootId = (if(path.length == 1) labelToRootId - path.last else labelToRootId) match {case x => if(pathNewParent.isEmpty) x + (path.last -> idSubroot) else x}
-    try LabeledForest(newIdToNode, newLabelToRootId, ramDirectory)
-    finally removePathsFromIndex(Seq(path))
+    val withSubtreeMoved_ = LabeledForest(newIdToNode, newLabelToRootId, ramDirectory)
+    removePathsFromIndex(Seq(path))
+    withSubtreeMoved_
   }
 
 
   def withoutSubtree(path: Seq[N]): LabeledForest[N] = {
     val rootId = id(path)
-    try LabeledForest[N](
+    val withoutSubtree_ = LabeledForest[N](
       LabeledForest.withoutNode(idToNode, rootId).--(idsSubtree(rootId)),
       LabeledForest.withoutNode(labelToRootId, idToNode(rootId)),
       ramDirectory
     )
-    finally removePathsFromIndex(pathsSubtree(path))
+    removePathsFromIndex(pathsSubtree(path))
+    withoutSubtree_
   }
 
 
@@ -335,6 +337,11 @@ object LabeledForest {
 
     def withLabel(label: N): LabeledTreeNode[N] = {
       LabeledTreeNode(label, parentId, labelToChildId)
+    }
+
+
+    def withParent(parentId: Option[Long]): LabeledTreeNode[N] = {
+      LabeledTreeNode[N](label, parentId, labelToChildId)
     }
 
   }

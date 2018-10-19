@@ -140,14 +140,26 @@ class LabeledForestSpec extends FunSpec with LabeledForestTestData {
 
     describe("withSubtreeMoved"){
       it("should move an existing subtree to the child of an existing path outside of the subtree to move if a child does not already exist with the same name"){
-
+        paths.flatMap(x => paths.filter(!_.startsWith(x.init)).map((x, _))).foreach{ pathToMove_newParent =>
+          val (pathToMove, newParent) = (pathToMove_newParent._1, pathToMove_newParent._2)
+          val withSubtreeMoved = labeledForest.withSubtreeMoved(pathToMove, Some(newParent))
+          assert(!withSubtreeMoved.paths.contains(pathToMove))
+          paths.filter(_.startsWith(pathToMove)).map(newParent ++ _.drop(pathToMove.init.length)).foreach(x => assert(withSubtreeMoved.paths.contains(x)))
+        }
       }
       it("should move an existing subtree to a root if a root does not already exist with the same name"){
-        paths.filter(x => !labeledForest.roots.contains(x.last)).foreach{path =>
+        paths.filter(x => !labeledForest.roots.contains(x.last)).foreach{ path =>
           val withSubtreeMoved = labeledForest.withSubtreeMoved(path, None)
           assert(withSubtreeMoved.paths.contains(Seq(path.last)))
           assert(withSubtreeMoved.roots.contains(path.last))
           assert(!withSubtreeMoved.paths.contains(path))
+        }
+      }
+      it("should return an equivalent LabeledForest if pathNewParent is the parent of path"){
+        paths.map(x => (x, x.init)).foreach{ pathToMove_newParent =>
+          val (pathToMove, newParent) = (pathToMove_newParent._1, pathToMove_newParent._2)
+          val withSubtreeMoved = labeledForest.withSubtreeMoved(pathToMove, Some(newParent).filter(_.nonEmpty))
+          assert(withSubtreeMoved == labeledForest)
         }
       }
     }
