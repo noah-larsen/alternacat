@@ -47,8 +47,8 @@ case class CommandInvocation[T <: Command, U](
   }
 
 
-  def value(optionalParameter: OptionParameter): Boolean = {
-    options.contains(optionalParameter.letter)
+  def value(optionParameter: OptionParameter): Boolean = {
+    options.contains(optionParameter.letter)
   }
 
 
