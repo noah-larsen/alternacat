@@ -2,7 +2,7 @@ package consoleApplication
 
 import consoleApplication.CommonParameters.PartOfName
 import utils.commands.IndexedCommand.IndexCommand
-import utils.commands.Parameter.{ListParameter, StringsParameter, ValueParameter}
+import utils.commands.Parameter.{ListParameter, OptionParameter, StringsParameter, ValueParameter}
 import utils.commands.{Command, Commands, Parameter}
 
 object LookupTargetNodesCommands extends Commands {
@@ -20,6 +20,9 @@ object LookupTargetNodesCommands extends Commands {
   object EditName extends LookupTargetNodesCommand
   object Delete extends LookupTargetNodesCommand
   object Back extends LookupTargetNodesCommand
+
+
+  object Unrelated extends OptionParameter
 
 
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[LookupTargetNodesCommands.type], classOf[LookupTargetNodesCommand])
