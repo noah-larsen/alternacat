@@ -9,7 +9,7 @@ case class ConnectedForests[F, N] private (
                                           ) extends AbstractConnectedForests[F, N] {
 
   def labelToForestAndRelatedNodes: Map[F, (LabeledForest[N], Map[(Long, F), Set[Long]])] = {
-    labelToForest.map(x => (x._1, (x._2, relatedNodes.filter(_._1.fromForestLabel == x).map(y => ((y._1.fromForestNodeId, y._1.toForestLabel), y._2)))))
+    labelToForest.map(x => (x._1, (x._2, relatedNodes.filter(_._1.fromForestLabel == x._1).map(y => ((y._1.fromForestNodeId, y._1.toForestLabel), y._2)))))
   }
 
 
