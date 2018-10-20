@@ -59,6 +59,9 @@ trait AbstractConnectedForests[F, N] {
   def withRelationship(forest1Label: F, forest1Path: Seq[N], forest2Label: F, forest2Path: Seq[N]): Self
 
 
+  def withSubtreeMoved(forestLabel: F, path: Seq[N], pathNewParent: Option[Seq[N]]): Self
+
+
   def withoutRelationship(forest1Label: F, forest1Path: Seq[N], forest2Label: F, forest2Path: Seq[N]): Self
 
 

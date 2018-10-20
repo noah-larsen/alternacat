@@ -177,6 +177,11 @@ class ConnectedForestsSpec extends FunSpec with ConnectedForestsTestData {
       }
     }
 
+
+    describe("withSubtreeMoved"){
+      //todo
+    }
+
   }
 
 }

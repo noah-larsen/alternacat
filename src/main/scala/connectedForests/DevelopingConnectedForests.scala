@@ -142,6 +142,11 @@ case class DevelopingConnectedForests[F, N] private (
   }
 
 
+  override def withSubtreeMoved(forestLabel: F, path: Seq[N], pathNewParent: Option[Seq[N]]): DevelopingConnectedForests[F, N] = {
+    DevelopingConnectedForests(connectedForests.withSubtreeMoved(forestLabel, path, pathNewParent), relatedNodesKeyToFinishedProportion)
+  }
+
+
   override protected type Self = DevelopingConnectedForests[F, N]
 
 
