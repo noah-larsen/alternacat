@@ -204,7 +204,10 @@ object Driver extends App {
 
 
     def createNewTargetNodeAndContinue(commandInvocation: CommandInvocation[LookupTargetNodesCommand, Seq[String]]) = {
-      lookupTargetNodes(dcfs.withPath(targetForest, targetNode.getOrElse(Nil) :+ format(commandInvocation.value(PartOfName))), sourceNode, targetNode)
+      val newTargetNode = targetNode.getOrElse(Nil) :+ format(commandInvocation.value(PartOfName))
+      val withNewTargetNode = dcfs.withPath(targetForest, newTargetNode) match {case x => if(commandInvocation.value(Unrelated)) x else x.withRelationship(sourceForest,
+        sourceNode, targetForest, newTargetNode)}
+      lookupTargetNodes(withNewTargetNode, sourceNode, targetNode)
     }
 
 

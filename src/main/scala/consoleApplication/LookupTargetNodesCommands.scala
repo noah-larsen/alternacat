@@ -14,8 +14,8 @@ object LookupTargetNodesCommands extends Commands {
   object GoUp extends LookupTargetNodesCommand(specifiedLetterName = Some('u'))
   object MarkRelated extends LookupTargetNodesCommand
   object RemoveRelatedness extends LookupTargetNodesCommand
-  object CreateNewTargetRootNode extends LookupTargetNodesCommand(Seq(PartOfName))
-  object CreateNewTargetChildNode extends LookupTargetNodesCommand(Seq(PartOfName))
+  object CreateNewTargetRootNode extends LookupTargetNodesCommand(Seq(Unrelated, PartOfName))
+  object CreateNewTargetChildNode extends LookupTargetNodesCommand(Seq(Unrelated, PartOfName))
   object AbbreviationsForNamingTargetNodes extends LookupTargetNodesCommand
   object EditName extends LookupTargetNodesCommand
   object Delete extends LookupTargetNodesCommand
