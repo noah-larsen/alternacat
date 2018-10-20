@@ -90,7 +90,7 @@ trait Commands extends Enumerated {
               .contains(y._2)).map(y => CommandInvocation(y._1, tokens.tail, Some(indexedCommandValues(y._2))).validate.map(Left(_)))
           case x if x.isInstanceOf[IndexListCommand] =>
             indexedCommand.filter(!without.contains(_)).map((_, tokens.map(y => Try(y.toInt)))).filter(_._2.forall(_.isSuccess)).map(y => (y._1, y._2.map(_.get))).filter(_._2
-              .forall(y => indexedCommandValues.contains(y))).map(y => Left(CommandInvocation[CommandType, T](y._1, Seq(), None, Some(y._2.map(indexedCommandValues(_))))))
+              .forall(y => indexedCommandValues.contains(y))).map(y => Try(Left(CommandInvocation[CommandType, T](y._1, Seq(), None, Some(y._2.map(indexedCommandValues(_)))))))
         }.flatten
       )
       .orElse(helpOption.filter(_ => Help.letterName.toString == tokens.head).map(x => Try(Right(x))))
