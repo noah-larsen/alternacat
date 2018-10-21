@@ -25,6 +25,7 @@ import taxonomies.ProductTaxonomy
 import utils.commands.{Command, CommandInvocation, Commands, IndexedCommand}
 import utils.commands.Parameter.ListParameter
 import utils.enumerated.{Enumerated, SelfNamed}
+import utils.exceptions.SelfDescribed
 import utils.io.{Display, IO}
 
 import scala.io.Source
@@ -223,6 +224,26 @@ object Driver extends App {
     }
 
 
+    def moveSubtree(indexToChildrenOrRoots: Map[Int, Seq[String]], nNodeToMove: Int, nNodeToMoveInto: Option[Int]): DCFS = {
+      object InvalidParameters extends SelfDescribed
+      object CannotMoveSubtreeInsideItself extends SelfDescribed
+      object NodeWithSameNameAsSubrootAlreadyExistsAtMoveLocation extends SelfDescribed
+      val dcfsOrErrorMessage = (indexToChildrenOrRoots.get(nNodeToMove), nNodeToMoveInto.map(indexToChildrenOrRoots.get)) match {
+        case x if x._1.isEmpty || x._2.contains(None) => Right(InvalidParameters.getMessage)
+        case (Some(x), None) if x.length > 1 && dcfs.roots(targetForest).contains(x.last) => Right(NodeWithSameNameAsSubrootAlreadyExistsAtMoveLocation.getMessage)
+        case (Some(x), Some(Some(y))) if y.startsWith(x) => Right(CannotMoveSubtreeInsideItself.getMessage)
+        case (Some(x), Some(Some(y))) if dcfs.children(targetForest, y).contains(x.last) => Right(NodeWithSameNameAsSubrootAlreadyExistsAtMoveLocation.getMessage)
+        case (Some(x), y) => Left(dcfs.withSubtreeMoved(targetForest, x, y.flatten))
+      }
+      dcfsOrErrorMessage match {
+        case Left(x) => x
+        case Right(errorMessage) =>
+          println(errorMessage)
+          lookupTargetNodes(dcfs, sourceNode, targetNode)
+      }
+    }
+
+
     val displaySourceNodePrefix = "(Source Node: "
     val displaySourceNodeSuffix = ")"
 
@@ -237,14 +258,16 @@ object Driver extends App {
 
     val without = Seq(
       (GoUp, targetNode.isEmpty),
-      (MarkRelated, targetNode.forall(dcfs.relatedNodesOfPath(sourceForest, sourceNode, targetForest).flatten.contains) || targetNode.forall(x => dcfs
+      (SetAsRelated, targetNode.forall(dcfs.relatedNodesOfPath(sourceForest, sourceNode, targetForest).flatten.contains) || targetNode.forall(x => dcfs
         .relatedNodes(sourceForest, sourceNode, targetForest).exists(LabeledForest.subOrSuperPathsOf(x, _)))),
       (RemoveRelatedness, targetNode.forall(!dcfs.relatedNodes(sourceForest, sourceNode, targetForest).contains(_))),
       (CreateNewTargetRootNode, targetNode.nonEmpty),
       (CreateNewTargetChildNode, targetNode.isEmpty),
+      (AbbreviationsForNamingTargetNodes, abbreviationToTargetNodeNameSubstring.isEmpty),
       (EditName, targetNode.isEmpty),
+      (MoveChildWithinAnotherChildOrUp, targetNode.isEmpty),
+      (MoveRootWithinAnotherRoot, targetNode.nonEmpty || dcfs.roots(targetForest).size <= 1),
       (Delete, targetNode.forall(x => dcfs.relatedNodes(targetForest, x, sourceForest).nonEmpty || dcfs.children(targetForest, x).nonEmpty)),
-      (AbbreviationsForNamingTargetNodes, abbreviationToTargetNodeNameSubstring.isEmpty)
     ).filter(_._2).map(_._1)
 
 
@@ -253,15 +276,19 @@ object Driver extends App {
     commandInvocation.command match {
       case GoTo => lookupTargetNodes(dcfs, sourceNode, commandInvocation.indexCommandSelection)
       case GoUp => lookupTargetNodes(dcfs, sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
-      case MarkRelated => lookupTargetNodes(dcfs.withRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
+      case SetAsRelated => lookupTargetNodes(dcfs.withRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
       case RemoveRelatedness => lookupTargetNodes(dcfs.withoutRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
       case CreateNewTargetRootNode => createNewTargetNodeAndContinue(commandInvocation)
       case CreateNewTargetChildNode => createNewTargetNodeAndContinue(commandInvocation)
-      case EditName => editName match {case x => lookupTargetNodes(x._1, sourceNode, Some(x._2))}
-      case Delete => lookupTargetNodes(dcfs.withoutSubtree(targetForest, targetNode.get), sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
       case AbbreviationsForNamingTargetNodes =>
         println(displayAbbreviations)
         lookupTargetNodes(dcfs, sourceNode, targetNode)
+      case EditName => editName match {case x => lookupTargetNodes(x._1, sourceNode, Some(x._2))}
+      case MoveChildWithinAnotherChildOrUp =>
+        moveSubtree(indexToChildrenOrRoots, commandInvocation.value(NumberOfChildToMove), commandInvocation.value(NumberOfChildToMoveInto))
+      case MoveRootWithinAnotherRoot =>
+        moveSubtree(indexToChildrenOrRoots, commandInvocation.value(NumberOfRootToMove), Some(commandInvocation.value(NumberOfRootToMoveInto)))
+      case Delete => lookupTargetNodes(dcfs.withoutSubtree(targetForest, targetNode.get), sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
       case LookupTargetNodesCommands.Back =>
         if(autoSave) save(dcfs)
         dcfs
