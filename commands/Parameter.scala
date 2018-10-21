@@ -27,8 +27,14 @@ object Parameter {
 
 
   abstract class OptionParameter(
-                                  val letter: Char
-                                ) extends Parameter
+                                  val letter_ : Option[Char] = None
+                                ) extends Parameter{
+
+    def letter: Char = {
+      letter_.getOrElse(name.head.toLower)
+    }
+
+  }
 
 
   abstract class StringParameter(default: Option[String] = None) extends ValueParameter(Try(_), default)

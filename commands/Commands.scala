@@ -19,7 +19,8 @@ trait Commands extends Enumerated {
   def promptUntilParsed[T](indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true, leadWithNewline: Boolean = true)
                           (implicit clearScreenUponSuccess: Boolean = true): CommandInvocation[CommandType, T] = {
 
-    def promptUntilParsedInternal(indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true, leadWithNewline: Boolean = true): Either[CommandInvocation[CommandType, T], CommandType => String] = {
+    def promptUntilParsedInternal(indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true,
+                                  leadWithNewline: Boolean = true): Either[CommandInvocation[CommandType, T], CommandType => String] = {
       if(showUsage) println((if(leadWithNewline) System.lineSeparator() else new String) + usage(without))
       def readLineUntilNonEmpty: String = StdIn.readLine() match {case x if Option(x).forall(_.trim.isEmpty) => readLineUntilNonEmpty case x => x}
       commandInvocationOrHelp(readLineUntilNonEmpty, indexCommandItems, without).recover{case e: CommandException =>
@@ -37,8 +38,8 @@ trait Commands extends Enumerated {
       case Right(commandToHelpMessage) =>
         IO.clearScreen()
         val maxWidth = 80
-        println(commands.filter(x => commandToHelpMessage(x).nonEmpty).map(y => Display.withSpacedDashes(y.name, new String) + System.lineSeparator() + Display.indentLines(Display.wordWrap(commandToHelpMessage(y), maxWidth)) + System.lineSeparator())
-          .mkString(System.lineSeparator()))
+        println(commands.filter(x => commandToHelpMessage(x).nonEmpty).map(y => Display.withSpacedDashes(y.name, new String) + System.lineSeparator() + Display.indentLines(
+          Display.wordWrap(commandToHelpMessage(y), maxWidth)) + System.lineSeparator()).mkString(System.lineSeparator()))
         promptUntilParsed(indexCommandItems, withoutComplete, showUsage)
     }
 
@@ -78,11 +79,12 @@ trait Commands extends Enumerated {
   }
 
 
-  private def commandInvocationOrHelp[T](line: String, indexedCommandValues: Map[Int, T] = Map(), without: Seq[CommandType] = Seq()): Try[Either[CommandInvocation[CommandType, T], CommandType => String]] = {
+  private def commandInvocationOrHelp[T](line: String, indexedCommandValues: Map[Int, T] = Map(), without: Seq[CommandType] = Seq()): Try[Either[CommandInvocation[
+    CommandType, T], CommandType => String]] = {
     val whitespaceRe = "\\s+"
     val tokens = line.split(whitespaceRe)
-    letterCommands
-      .find(_.letterName.toString == tokens.head).filter(!without.contains(_)).map(x => CommandInvocation[CommandType, T](x, tokens.tail).validate.map(Left(_)))
+    letterCommands.filter(!without.contains(_))
+      .find(_.letterName.toString == tokens.head).map(x => CommandInvocation[CommandType, T](x, tokens.tail).validate.map(Left(_)))
       .orElse(
         indexedCommand.collect {
           case x if x.isInstanceOf[IndexCommand] =>
@@ -90,7 +92,8 @@ trait Commands extends Enumerated {
               .contains(y._2)).map(y => CommandInvocation(y._1, tokens.tail, Some(indexedCommandValues(y._2))).validate.map(Left(_)))
           case x if x.isInstanceOf[IndexListCommand] =>
             indexedCommand.filter(!without.contains(_)).map((_, tokens.map(y => Try(y.toInt)))).filter(_._2.forall(_.isSuccess)).map(y => (y._1, y._2.map(_.get))).filter(_._2
-              .forall(y => indexedCommandValues.contains(y))).map(y => Left(CommandInvocation[CommandType, T](y._1, Seq(), None, Some(y._2.map(indexedCommandValues(_))))))
+              .forall(y => indexedCommandValues.contains(y))).map(y => Try(Left(CommandInvocation[CommandType, T](y._1, Seq(), None, Some(y._2.map(
+              indexedCommandValues(_)))))))
         }.flatten
       )
       .orElse(helpOption.filter(_ => Help.letterName.toString == tokens.head).map(x => Try(Right(x))))

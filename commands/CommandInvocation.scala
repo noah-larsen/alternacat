@@ -29,26 +29,26 @@ case class CommandInvocation[T <: Command, U](
 
   def value[V](valueParameter: ValueParameter[V]): V = {
     (positionalParameters.indexOf(valueParameter), valueParameter.default) match {
-      case (x, Some(y)) if !arguments.indices.contains(x) => y
-      case (x, _) => valueParameter.parse(arguments(x)).get
+      case (x, Some(y)) if !positionalArguments.indices.contains(x) => y
+      case (x, _) => valueParameter.parse(positionalArguments(x)).get
     }
   }
 
 
   def value[V](optionalParameter: OptionalParameter[V]): Option[V] = {
     Some(positionalParameters.indexOf(optionalParameter))
-      .filter(arguments.indices.contains)
-      .map(x => optionalParameter.parse(arguments(x)).get)
+      .filter(positionalArguments.indices.contains)
+      .map(x => optionalParameter.parse(positionalArguments(x)).get)
   }
 
 
   def value[V](listParameter: ListParameter[V]): Seq[V] = {
-    listParameter.parse(arguments.slice(command.parameters.indexOf(listParameter), arguments.length)).get
+    listParameter.parse(positionalArguments.slice(positionalParameters.indexOf(listParameter), positionalArguments.length)).get
   }
 
 
-  def value(optionalParameter: OptionParameter): Boolean = {
-    options.contains(optionalParameter.letter)
+  def value(optionParameter: OptionParameter): Boolean = {
+    options.contains(optionParameter.letter)
   }
 
 
@@ -71,8 +71,8 @@ case class CommandInvocation[T <: Command, U](
     parameters.lastOption.map{
       case x: ValueParameter[_] => positionalParameters.zip(positionalArguments).map(x => (x._1, Seq(x._2))).toMap
       case x: OptionalParameter[_] => positionalParameters.zip(positionalArguments).map(x => (x._1, Seq(x._2))).toMap
-      case x: ListParameter[_] => positionalParameters.init.zip(positionalArguments).map(x => (x._1, Seq(x._2))).toMap + (x -> arguments.slice(parameters.length - 1, arguments
-        .length))
+      case x: ListParameter[_] => positionalParameters.init.zip(positionalArguments).map(x => (x._1, Seq(x._2))).toMap + (x -> positionalArguments.slice(positionalParameters
+        .length - 1, positionalArguments.length))
       case x: OptionParameter => Map[Parameter, Seq[String]]()
     }.getOrElse(Map())
   }
