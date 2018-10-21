@@ -276,7 +276,7 @@ object Driver extends App {
       (CreateNewTargetChildNode, targetNode.forall(isNewChildOfRelateable)),
       (AbbreviationsForNamingTargetNodes, abbreviationToTargetNodeNameSubstring.isEmpty),
       (EditName, targetNode.isEmpty),
-      (MoveChildWithinAnotherChildOrUp, targetNode.isEmpty),
+      (MoveChildWithinAnotherChildOrUp, targetNode.forall(dcfs.children(targetForest, _).isEmpty)),
       (MoveRootWithinAnotherRoot, targetNode.nonEmpty || dcfs.roots(targetForest).size <= 1),
       (Delete, targetNode.forall(x => dcfs.relatedNodes(targetForest, x, sourceForest).nonEmpty || dcfs.children(targetForest, x).nonEmpty)),
     ).filter(_._2).map(_._1)
