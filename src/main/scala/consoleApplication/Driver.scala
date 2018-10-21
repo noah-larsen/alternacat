@@ -206,8 +206,8 @@ object Driver extends App {
 
     def createNewTargetNodeAndContinue(commandInvocation: CommandInvocation[LookupTargetNodesCommand, Seq[String]]) = {
       val newTargetNode = targetNode.getOrElse(Nil) :+ format(commandInvocation.value(PartOfName))
-      val withNewTargetNode = dcfs.withPath(targetForest, newTargetNode) match {case x => if(commandInvocation.value(Unrelated)) x else x.withRelationship(sourceForest,
-        sourceNode, targetForest, newTargetNode)}
+      val withNewTargetNode = dcfs.withPath(targetForest, newTargetNode) match {case x => if(!commandInvocation.command.parameters.contains(Unrelated) || commandInvocation
+        .value(Unrelated)) x else x.withRelationship(sourceForest, sourceNode, targetForest, newTargetNode)}
       lookupTargetNodes(withNewTargetNode, sourceNode, targetNode)
     }
 
@@ -291,7 +291,7 @@ object Driver extends App {
       case RemoveRelatedness => lookupTargetNodes(dcfs.withoutRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
       case CreateNewRelatedTargetRootNode => createNewTargetNodeAndContinue(commandInvocation)
       case CreateNewRelatedTargetChildNode => createNewTargetNodeAndContinue(commandInvocation)
-      case CreateNewTargetChildNode => ???
+      case CreateNewTargetChildNode => createNewTargetNodeAndContinue(commandInvocation)
       case AbbreviationsForNamingTargetNodes =>
         println(displayAbbreviations)
         lookupTargetNodes(dcfs, sourceNode, targetNode)
