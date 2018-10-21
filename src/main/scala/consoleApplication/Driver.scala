@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit
 
 import connectedForests.{DevelopingConnectedForests, LabeledForest}
 import consoleApplication.BrowseCommands.{SourceNodes, TargetNodes}
-import consoleApplication.LookupTargetNodesCommands.{CreateNewTargetChildNode, _}
+import consoleApplication.LookupTargetNodesCommands.{CreateNewRelatedTargetChildNode, _}
 import consoleApplication.CommonParameters.{Keyword, MaxDepth, PartOfName}
 import consoleApplication.ConnectSourceNodeCommands.{Back, _}
 import consoleApplication.ConnectSourceNodesSelectionCommands.{SelectAll, SelectNodes}
@@ -244,6 +244,17 @@ object Driver extends App {
     }
 
 
+    def isRelateable(realOrPotentialTargetNode: Seq[String]): Boolean = {
+      !(dcfs.relatedNodesOfPath(sourceForest, sourceNode, targetForest).flatten.contains(realOrPotentialTargetNode) || dcfs.relatedNodes(sourceForest, sourceNode,
+        targetForest).exists(LabeledForest.isSubOrSuperPathOf(realOrPotentialTargetNode, _)))
+    }
+
+
+    def isNewChildOfRelateable(targetNode: Seq[String]): Boolean = {
+      isRelateable(targetNode.:+(Some(dcfs.children(targetForest, targetNode)).filter(_.nonEmpty).map(_.maxBy(_.length)).getOrElse(new String) + 0.toString))
+    }
+
+
     val displaySourceNodePrefix = "(Source Node: "
     val displaySourceNodeSuffix = ")"
 
@@ -258,11 +269,11 @@ object Driver extends App {
 
     val without = Seq(
       (GoUp, targetNode.isEmpty),
-      (SetAsRelated, targetNode.forall(dcfs.relatedNodesOfPath(sourceForest, sourceNode, targetForest).flatten.contains) || targetNode.forall(x => dcfs
-        .relatedNodes(sourceForest, sourceNode, targetForest).exists(LabeledForest.subOrSuperPathsOf(x, _)))),
+      (SetAsRelated, targetNode.forall(!isRelateable(_))),
       (RemoveRelatedness, targetNode.forall(!dcfs.relatedNodes(sourceForest, sourceNode, targetForest).contains(_))),
-      (CreateNewTargetRootNode, targetNode.nonEmpty),
-      (CreateNewTargetChildNode, targetNode.isEmpty),
+      (CreateNewRelatedTargetRootNode, targetNode.nonEmpty),
+      (CreateNewRelatedTargetChildNode, targetNode.forall(!isNewChildOfRelateable(_))),
+      (CreateNewTargetChildNode, targetNode.forall(isNewChildOfRelateable)),
       (AbbreviationsForNamingTargetNodes, abbreviationToTargetNodeNameSubstring.isEmpty),
       (EditName, targetNode.isEmpty),
       (MoveChildWithinAnotherChildOrUp, targetNode.isEmpty),
@@ -278,8 +289,9 @@ object Driver extends App {
       case GoUp => lookupTargetNodes(dcfs, sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
       case SetAsRelated => lookupTargetNodes(dcfs.withRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
       case RemoveRelatedness => lookupTargetNodes(dcfs.withoutRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
-      case CreateNewTargetRootNode => createNewTargetNodeAndContinue(commandInvocation)
-      case CreateNewTargetChildNode => createNewTargetNodeAndContinue(commandInvocation)
+      case CreateNewRelatedTargetRootNode => createNewTargetNodeAndContinue(commandInvocation)
+      case CreateNewRelatedTargetChildNode => createNewTargetNodeAndContinue(commandInvocation)
+      case CreateNewTargetChildNode => ???
       case AbbreviationsForNamingTargetNodes =>
         println(displayAbbreviations)
         lookupTargetNodes(dcfs, sourceNode, targetNode)
@@ -323,7 +335,7 @@ object Driver extends App {
 
   private def sourceSubPathAndNonEmptySelectRelatedNodes(dcfs: DCFS, sourceNode: Seq[String], targetNodeToDisplayOnlySubOrSuperPathsOf: Seq[String]
                                                         ): Seq[(Seq[String], Set[Seq[String]])] = {
-    LabeledForest.subPaths(sourceNode).zip(dcfs.relatedNodesOfPath(sourceForest, sourceNode, targetForest).map(_.filter(LabeledForest.subOrSuperPathsOf(_,
+    LabeledForest.subPaths(sourceNode).zip(dcfs.relatedNodesOfPath(sourceForest, sourceNode, targetForest).map(_.filter(LabeledForest.isSubOrSuperPathOf(_,
       targetNodeToDisplayOnlySubOrSuperPathsOf)))).filter(_._2.nonEmpty)
   }
 

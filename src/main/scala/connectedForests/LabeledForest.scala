@@ -275,7 +275,7 @@ object LabeledForest {
   }
 
 
-  def subOrSuperPathsOf[N](path1: Seq[N], path2: Seq[N]): Boolean = {
+  def isSubOrSuperPathOf[N](path1: Seq[N], path2: Seq[N]): Boolean = {
     path1.startsWith(path2) || path2.startsWith(path1)
   }
 
