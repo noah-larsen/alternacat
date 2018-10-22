@@ -179,7 +179,12 @@ class ConnectedForestsSpec extends FunSpec with ConnectedForestsTestData {
 
 
     describe("withSubtreeMoved"){
-      //todo
+      it("should return a connected forests object with the applicable forest the same as if withSubtreeMoved had been performed individually on it"){
+        //todo
+      }
+      it("should return a connected forests object without any relationships in the moved subtree that already exist along the path to the new parent"){
+        //todo
+      }
     }
 
   }

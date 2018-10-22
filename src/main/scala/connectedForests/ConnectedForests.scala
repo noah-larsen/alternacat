@@ -162,7 +162,17 @@ case class ConnectedForests[F, N] private (
 
 
   override def withSubtreeMoved(forestLabel: F, path: Seq[N], pathNewParent: Option[Seq[N]]): ConnectedForests[F, N] = {
-    ConnectedForests(labelToForest + (forestLabel -> labelToForest(forestLabel).withSubtreeMoved(path, pathNewParent)), relatedNodes)
+    val newRelatedNodes =
+      pathNewParent match {
+        case Some(pathNewParent_) =>
+          forestLabels.foldLeft(this){(connectedForests, toForest) =>
+            val pathsSubtree = connectedForests.pathsSubtree(forestLabel, path)
+            val relatedNodesOfNewParentPath = connectedForests.relatedNodesOfPath(forestLabel, pathNewParent_, toForest).flatten
+            pathsSubtree.flatMap(x => relatedNodesOfNewParentPath.map((x, _))).foldLeft(connectedForests)((x, y) => x.withoutRelationship(forestLabel, y._1, toForest, y._2))
+          }.relatedNodes
+        case None => relatedNodes
+      }
+    ConnectedForests(labelToForest + (forestLabel -> labelToForest(forestLabel).withSubtreeMoved(path, pathNewParent)), newRelatedNodes)
   }
 
 

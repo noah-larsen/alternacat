@@ -9,10 +9,10 @@ import scala.util.Try
 object ConnectSourceNodeCommands extends Commands {
 
   override type CommandType = ConnectSourceNodeCommand
-  sealed abstract class ConnectSourceNodeCommand(parameters: Seq[Parameter] = Seq()) extends Command(parameters)
+  sealed abstract class ConnectSourceNodeCommand(parameters: Seq[Parameter] = Seq(), specifiedLetterName: Option[Char] = None) extends Command(parameters, specifiedLetterName)
 
   object RelatedTargetNodes extends ConnectSourceNodeCommand
-  object LookupTargetNodes extends ConnectSourceNodeCommand
+  object BrowseTargetNodes extends ConnectSourceNodeCommand(specifiedLetterName = Some('t'))
   object SearchTargetNodes extends ConnectSourceNodeCommand(Seq(Keyword))
   object Descendants extends ConnectSourceNodeCommand(Seq(MaxDepth))
   object Kin extends ConnectSourceNodeCommand(Seq(MaxDepth))
