@@ -19,6 +19,7 @@ trait Commands extends Enumerated {
   def promptUntilParsed[T](indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true, leadWithNewline: Boolean = true)
                           (implicit clearScreenUponSuccess: Boolean = true): CommandInvocation[CommandType, T] = {
 
+
     def promptUntilParsedInternal(indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true,
                                   leadWithNewline: Boolean = true): Either[CommandInvocation[CommandType, T], CommandType => String] = {
       if(showUsage) println((if(leadWithNewline) System.lineSeparator() else new String) + usage(without))
