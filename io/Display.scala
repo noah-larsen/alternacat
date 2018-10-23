@@ -62,6 +62,17 @@ object Display {
   }
 
 
+  def withPipes: Seq[String] => String = {
+    val separator = "|"
+    _.mkString(separator)
+  }
+
+
+  def withPipes(values: String*): String = {
+    withNewlines(values.toSeq)
+  }
+
+
   def withSemicolonSpaces: Seq[String] => String = {
     val separator = "; "
     _.mkString(separator)
