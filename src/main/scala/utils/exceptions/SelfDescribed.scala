@@ -5,7 +5,7 @@ import utils.enumerated.SelfNamed.NameFormats.ObjectNameWithSpacesBetweenWords
 import utils.io.Display
 
 abstract class SelfDescribed(
-                              parameters: Seq[Seq[String]] = Seq(Seq()),
+                              parameters: Seq[Seq[String]] = Seq(),
                               cause: Option[Throwable] = None,
                               includeCauseMessage: Boolean = true
                             ) extends Exception(cause.orNull) with SelfNameable {
@@ -21,7 +21,10 @@ abstract class SelfDescribed(
 
 
   override def getMessage: String = {
-    Display.withColonSpace(name(ObjectNameWithSpacesBetweenWords())) + Display.withSemicolonSpaces(cause.filter(_ => !includeCauseMessage).map(x => parameters ++ Seq(Seq(x.getMessage))).getOrElse(parameters).map(Display.withCommaSpaces))
+    (name(ObjectNameWithSpacesBetweenWords()) match {
+      case x if parameters.isEmpty => x
+      case x => Display.withColonSpace(x)
+    }) + Display.withSemicolonSpaces(cause.filter(_ => !includeCauseMessage).map(x => parameters ++ Seq(Seq(x.getMessage))).getOrElse(parameters).map(Display.withCommaSpaces))
   }
 
 }
