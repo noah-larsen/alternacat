@@ -12,7 +12,7 @@ object ConnectSourceNodeCommands extends Commands {
   sealed abstract class ConnectSourceNodeCommand(parameters: Seq[Parameter] = Seq(), specifiedLetterName: Option[Char] = None) extends Command(parameters, specifiedLetterName)
 
   object RelatedTargetNodes extends ConnectSourceNodeCommand
-  object BrowseTargetNodes extends ConnectSourceNodeCommand(specifiedLetterName = Some('t'))
+  object GoToTargetNodes extends ConnectSourceNodeCommand(specifiedLetterName = Some('t'))
   object SearchTargetNodes extends ConnectSourceNodeCommand(Seq(Keyword))
   object Descendants extends ConnectSourceNodeCommand(Seq(MaxDepth))
   object Kin extends ConnectSourceNodeCommand(Seq(MaxDepth))

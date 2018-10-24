@@ -158,7 +158,7 @@ object Driver extends App {
       case RelatedTargetNodes =>
         println(displayRelatedNodes(dcfs, unfinishedSubroot) + System.lineSeparator())
         editRelatedNodes(dcfs, unfinishedSubroot)
-      case BrowseTargetNodes => editRelatedNodes(browseTargetNodes(dcfs, unfinishedSubroot), unfinishedSubroot)
+      case GoToTargetNodes => editRelatedNodes(goToTargetNodes(dcfs, unfinishedSubroot), unfinishedSubroot)
       case SearchTargetNodes => editRelatedNodes(search(dcfs, unfinishedSubroot, commandInvocation.value(Keyword)), unfinishedSubroot)
       case Descendants =>
         println(displayDescendants(dcfs, sourceForest, unfinishedSubroot, commandInvocation.value(MaxDepth)) + System.lineSeparator())
@@ -189,7 +189,7 @@ object Driver extends App {
   }
 
 
-  private def browseTargetNodes(dcfs: DCFS, sourceNode: Seq[String], targetNode: Option[Seq[String]] = None): DCFS = {
+  private def goToTargetNodes(dcfs: DCFS, sourceNode: Seq[String], targetNode: Option[Seq[String]] = None): DCFS = {
 
     def editName: (DCFS, Seq[String]) = {
       println("Rename nodes to change wording and correct spelling only.")
@@ -210,7 +210,7 @@ object Driver extends App {
       val newTargetNode = targetNode.getOrElse(Nil) :+ format(commandInvocation.value(PartOfName))
       val withNewTargetNode = dcfs.withPath(targetForest, newTargetNode) match {case x => if(!commandInvocation.command.parameters.contains(Unrelated) || commandInvocation
         .value(Unrelated)) x else x.withRelationship(sourceForest, sourceNode, targetForest, newTargetNode)}
-      browseTargetNodes(withNewTargetNode, sourceNode, targetNode)
+      goToTargetNodes(withNewTargetNode, sourceNode, targetNode)
     }
 
 
@@ -236,9 +236,9 @@ object Driver extends App {
         case (Some(x), Some(Some(y))) if y.startsWith(x) => Right(CannotMoveSubtreeInsideItself.getMessage)
         case (Some(x), Some(Some(y))) if dcfs.children(targetForest, y).contains(x.last) => Right(NodeWithSameNameAsSubrootAlreadyExistsAtMoveLocation.getMessage)
         case (Some(x), Some(Some(y))) =>
-          println(Display.wordWrap("When moving subtrees non-vertically, any explicit relationships from subtree nodes to nodes from other forests that already exist " +
-            "along the path to the new parent will be removed. This means the move should only be made carefully, because if the subtree were subsequently moved again to a " +
-            "path that did not include these new ancestors, the relationships would be lost. Proceed with the move?"))
+          println(Display.wordWrap("When moving subtrees non-vertically, any explicit relationships that already exist along the path to the new parent from the subtree " +
+            "nodes to nodes from other forests will be removed. This means the move should only be made carefully, because if the subtree were subsequently moved again to " +
+            "a path that did not include these new ancestors, the relationships would be lost. Proceed?"))
           val commandInvocation = YesNoCommands.promptUntilParsed()
           commandInvocation.command match {
             case Yes => Left(dcfs.withSubtreeMoved(targetForest, x, Some(y)))
@@ -250,7 +250,7 @@ object Driver extends App {
         case Left(x) => x
         case Right(errorMessage) =>
           println(errorMessage)
-          browseTargetNodes(dcfs, sourceNode, targetNode)
+          goToTargetNodes(dcfs, sourceNode, targetNode)
       }
     }
 
@@ -296,24 +296,24 @@ object Driver extends App {
     val commandInvocation = BrowseTargetNodesCommands.promptUntilParsed(indexToChildrenOrRoots, without)
     log(commandInvocation)
     commandInvocation.command match {
-      case GoTo => browseTargetNodes(dcfs, sourceNode, commandInvocation.indexCommandSelection)
-      case GoUp => browseTargetNodes(dcfs, sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
-      case SetAsRelated => browseTargetNodes(dcfs.withRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
-      case RemoveRelatedness => browseTargetNodes(dcfs.withoutRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
+      case GoTo => goToTargetNodes(dcfs, sourceNode, commandInvocation.indexCommandSelection)
+      case GoUp => goToTargetNodes(dcfs, sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
+      case SetAsRelated => goToTargetNodes(dcfs.withRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
+      case RemoveRelatedness => goToTargetNodes(dcfs.withoutRelationship(sourceForest, sourceNode, targetForest, targetNode.get), sourceNode, targetNode)
       case CreateNewRelatedTargetRootNode => createNewTargetNodeAndContinue(commandInvocation)
       case CreateNewRelatedTargetChildNode => createNewTargetNodeAndContinue(commandInvocation)
       case CreateNewTargetChildNode => createNewTargetNodeAndContinue(commandInvocation)
       case AbbreviationsForNamingTargetNodes =>
         println(displayAbbreviations)
-        browseTargetNodes(dcfs, sourceNode, targetNode)
-      case EditName => editName match {case x => browseTargetNodes(x._1, sourceNode, Some(x._2))}
+        goToTargetNodes(dcfs, sourceNode, targetNode)
+      case EditName => editName match {case x => goToTargetNodes(x._1, sourceNode, Some(x._2))}
       case MoveChildWithinAnotherChildOrUp =>
-        browseTargetNodes(moveSubtree(indexToChildrenOrRoots, commandInvocation.value(NumberOfChildToMove), commandInvocation.value(NumberOfChildToMoveInto)), sourceNode,
+        goToTargetNodes(moveSubtree(indexToChildrenOrRoots, commandInvocation.value(NumberOfChildToMove), commandInvocation.value(NumberOfChildToMoveInto)), sourceNode,
           targetNode)
       case MoveRootWithinAnotherRoot =>
-        browseTargetNodes(moveSubtree(indexToChildrenOrRoots, commandInvocation.value(NumberOfRootToMove), Some(commandInvocation.value(NumberOfRootToMoveInto))), sourceNode,
+        goToTargetNodes(moveSubtree(indexToChildrenOrRoots, commandInvocation.value(NumberOfRootToMove), Some(commandInvocation.value(NumberOfRootToMoveInto))), sourceNode,
           targetNode)
-      case Delete => browseTargetNodes(dcfs.withoutSubtree(targetForest, targetNode.get), sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
+      case Delete => goToTargetNodes(dcfs.withoutSubtree(targetForest, targetNode.get), sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
       case BrowseTargetNodesCommands.Back =>
         if(autoSave) save(dcfs)
         dcfs
@@ -332,7 +332,7 @@ object Driver extends App {
     val commandInvocation = SearchResultCommands.promptUntilParsed(indexToResult)
     log(commandInvocation)
     commandInvocation.command match {
-      case GoToResultNumber => browseTargetNodes(dcfs, sourceForestNode, commandInvocation.indexCommandSelection)
+      case GoToResultNumber => goToTargetNodes(dcfs, sourceForestNode, commandInvocation.indexCommandSelection)
       case SearchResultCommands.Search => search(dcfs, sourceForestNode, commandInvocation.value(Keyword))
       case SearchResultCommands.Back => dcfs
     }
