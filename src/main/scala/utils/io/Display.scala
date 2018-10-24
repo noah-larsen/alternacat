@@ -146,7 +146,7 @@ object Display {
   }
 
 
-  def wordWrap(input: String, maxNCharactersPerLine: Int, tabWidth: Int = defaultTabWidth): String = {
+  def wordWrap(input: String, maxNCharactersPerLine: Int = defaultMaxNCharactersPerLine, tabWidth: Int = defaultTabWidth): String = {
     val wordLineBreakCharacter = "-"
     val normalized = withTabsToSpaces(input, tabWidth)
     val (line, remainder) = normalized match {
@@ -163,6 +163,11 @@ object Display {
         }
     }
     if(remainder.isEmpty) line else line + System.lineSeparator() + wordWrap(remainder, maxNCharactersPerLine, tabWidth)
+  }
+
+
+  private def defaultMaxNCharactersPerLine: Int = {
+    75
   }
 
 

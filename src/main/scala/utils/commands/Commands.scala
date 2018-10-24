@@ -38,9 +38,8 @@ trait Commands extends Enumerated {
         commandInvocation
       case Right(commandToHelpMessage) =>
         IO.clearScreen()
-        val maxWidth = 80
         println(commands.filter(x => commandToHelpMessage(x).nonEmpty).map(y => Display.withSpacedDashes(y.name, new String) + System.lineSeparator() + Display.indentLines(
-          Display.wordWrap(commandToHelpMessage(y), maxWidth)) + System.lineSeparator()).mkString(System.lineSeparator()))
+          Display.wordWrap(commandToHelpMessage(y))) + System.lineSeparator()).mkString(System.lineSeparator()))
         promptUntilParsed(indexCommandItems, withoutComplete, showUsage)
     }
 
