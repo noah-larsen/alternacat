@@ -236,9 +236,9 @@ object Driver extends App {
         case (Some(x), Some(Some(y))) if y.startsWith(x) => Right(CannotMoveSubtreeInsideItself.getMessage)
         case (Some(x), Some(Some(y))) if dcfs.children(targetForest, y).contains(x.last) => Right(NodeWithSameNameAsSubrootAlreadyExistsAtMoveLocation.getMessage)
         case (Some(x), Some(Some(y))) =>
-          println("When moving subtrees non-vertically, any explicit relationships from the subtree's nodes to nodes from other forests that already exist along the path " +
-            "to the new parent will be removed. This means the move should only be made carefully, because if the subtree were subsequently moved again to a path that did " +
-            "not include these ancestors, the relationships would be lost. Proceed with the move?")
+          println(Display.wordWrap("When moving subtrees non-vertically, any explicit relationships from subtree nodes to nodes from other forests that already exist " +
+            "along the path to the new parent will be removed. This means the move should only be made carefully, because if the subtree were subsequently moved again to a " +
+            "path that did not include these new ancestors, the relationships would be lost. Proceed with the move?"))
           val commandInvocation = YesNoCommands.promptUntilParsed()
           commandInvocation.command match {
             case Yes => Left(dcfs.withSubtreeMoved(targetForest, x, Some(y)))
