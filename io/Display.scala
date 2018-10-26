@@ -13,7 +13,7 @@ object Display {
   }
 
 
-  def table(rows: Seq[Seq[String]], header: Seq[String] = Seq(), reverse: Boolean = false): String = {
+  def table(rows: Seq[Seq[String]], header: Seq[String] = Seq(), reverse: Boolean = false, trimLastRow: Boolean = false): String = {
     val verticalDividerFillCharacter = "-"
     val verticalDividerColumnSeparator = "+"
     val newlineStrings = Seq("\n", "\r\n", "\r")
@@ -22,11 +22,16 @@ object Display {
       .map(_.map(newlineStrings.foldLeft(_)((x, y) => x.replace(y, newlineReplacement))))
     val lengthToNStringsColumns = unifiedRowsWithHeaderIfNonEmpty.transpose.map(_.map(_.length).groupBy(x => x).mapValues(_.length))
     val maxLengths = lengthToNStringsColumns.map(x => if(x(x.keys.max) < x.filterKeys(_ != x.keys.max).values.sum) x.keys.max else x.keys.max + 1)
-    val verticalDivider = maxLengths.map(verticalDividerFillCharacter * _).mkString(verticalDividerColumnSeparator, verticalDividerColumnSeparator,
+    val verticalDivider = (if(trimLastRow && maxLengths.nonEmpty) maxLengths.init.:+(if(header.lengthCompare(maxLengths.length) >= 0) header(maxLengths.indices.last)
+      .length else 1) else maxLengths).map(verticalDividerFillCharacter * _).mkString(verticalDividerColumnSeparator, verticalDividerColumnSeparator,
       verticalDividerColumnSeparator)
     def displayRow(row: Seq[String], maxLengths: Seq[Int], columnSeparator: String = "|"): String = {
       val space = " "
-      row.zip(maxLengths).map(x => x._1 + space * (x._2 - x._1.length)).mkString(columnSeparator, columnSeparator, columnSeparator)
+      val displayValues = row.zip(maxLengths).map(x => x._1 + space * (x._2 - x._1.length)) match {
+        case x if trimLastRow && x.nonEmpty => x.init.:+(x.last.trim)
+        case x => x
+      }
+      displayValues.mkString(columnSeparator, columnSeparator, if(trimLastRow) new String else columnSeparator)
     }
     Some(header.headOption.map(_ => Seq(verticalDivider, displayRow(unifiedRowsWithHeaderIfNonEmpty.head, maxLengths), verticalDivider)).getOrElse(Seq(verticalDivider))
       .++(header.headOption.map(_ => unifiedRowsWithHeaderIfNonEmpty.tail).getOrElse(unifiedRowsWithHeaderIfNonEmpty).map(displayRow(_, maxLengths))).:+(verticalDivider))
@@ -146,7 +151,7 @@ object Display {
   }
 
 
-  def wordWrap(input: String, maxNCharactersPerLine: Int, tabWidth: Int = defaultTabWidth): String = {
+  def wordWrap(input: String, maxNCharactersPerLine: Int = defaultMaxNCharactersPerLine, tabWidth: Int = defaultTabWidth): String = {
     val wordLineBreakCharacter = "-"
     val normalized = withTabsToSpaces(input, tabWidth)
     val (line, remainder) = normalized match {
@@ -163,6 +168,11 @@ object Display {
         }
     }
     if(remainder.isEmpty) line else line + System.lineSeparator() + wordWrap(remainder, maxNCharactersPerLine, tabWidth)
+  }
+
+
+  private def defaultMaxNCharactersPerLine: Int = {
+    75
   }
 
 
