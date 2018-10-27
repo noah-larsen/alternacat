@@ -1,7 +1,8 @@
-package consoleApplication
+package consoleApplication.commands
 
 import consoleApplication.CommonParameters.{Keyword, MaxDepth}
-import utils.commands.Parameter.{ListParameter, OptionalParameter, ValueParameter}
+import consoleApplication.finishedValues
+import utils.commands.Parameter.OptionalParameter
 import utils.commands._
 
 import scala.util.Try

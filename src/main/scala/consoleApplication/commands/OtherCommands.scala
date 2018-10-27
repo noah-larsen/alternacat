@@ -1,8 +1,7 @@
-package consoleApplication
+package consoleApplication.commands
 
-import utils.commands.Parameter.{StringParameter, ValueParameter}
+import utils.commands.Parameter.StringParameter
 import utils.commands.{Command, Commands, Parameter}
-import utils.enumerated.Enumerated
 
 object OtherCommands extends Commands {
 

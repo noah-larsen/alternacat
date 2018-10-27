@@ -1,4 +1,4 @@
-package consoleApplication
+package consoleApplication.commands
 
 import consoleApplication.CommonParameters.PartOfName
 import utils.commands.{Command, Commands, Parameter}

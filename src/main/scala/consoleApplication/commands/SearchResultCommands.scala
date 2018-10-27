@@ -1,4 +1,4 @@
-package consoleApplication
+package consoleApplication.commands
 
 import consoleApplication.CommonParameters.Keyword
 import utils.commands.IndexedCommand.IndexCommand

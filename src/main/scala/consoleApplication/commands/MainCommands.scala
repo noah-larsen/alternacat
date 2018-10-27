@@ -1,7 +1,8 @@
-package consoleApplication
+package consoleApplication.commands
 
+import consoleApplication.finishedValues
 import utils.commands.Parameter.ValueParameter
-import utils.commands.{Parameter, Command, Commands}
+import utils.commands.{Command, Commands, Parameter}
 
 import scala.util.Try
 

@@ -7,18 +7,19 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 import connectedForests.{DevelopingConnectedForests, LabeledForest}
-import consoleApplication.BrowseCommands.{SourceNodes, TargetNodes}
-import consoleApplication.BrowseTargetNodesCommands.{CreateNewRelatedTargetChildNode, _}
+import consoleApplication.commands.BrowseCommands.{SourceNodes, TargetNodes}
+import consoleApplication.commands.GoToTargetNodesCommands.{CreateNewRelatedTargetChildNode, _}
 import consoleApplication.CommonParameters.{Keyword, MaxDepth, PartOfName}
-import consoleApplication.ConnectSourceNodeCommands.{Back, _}
-import consoleApplication.ConnectSourceNodesSelectionCommands.{SelectAll, SelectNodes}
+import consoleApplication.commands.ConnectSourceNodeCommands.{Back, _}
+import consoleApplication.commands.ConnectSourceNodesSelectionCommands.{SelectAll, SelectNodes}
 import consoleApplication.Driver.ForestTypes
 import consoleApplication.Driver.ForestTypes.ForestType
-import consoleApplication.EditNameCommands.Edit
-import consoleApplication.OtherCommands.{ForestLabel, InitializeProductTaxonomy, Pathname}
-import consoleApplication.MainCommands._
-import consoleApplication.SearchResultCommands.GoToResultNumber
-import consoleApplication.YesNoCommands.{No, Yes}
+import consoleApplication.commands._
+import consoleApplication.commands.EditNameCommands.Edit
+import consoleApplication.commands.OtherCommands.{ForestLabel, InitializeProductTaxonomy, Pathname}
+import consoleApplication.commands.MainCommands._
+import consoleApplication.commands.SearchResultCommands.GoToResultNumber
+import consoleApplication.commands.YesNoCommands.{No, Yes}
 import org.rogach.scallop.{ScallopConf, ScallopOption}
 import persistence.{ConnectedForestsAndRelatedNodesToFinishedProportionJsonFormat, PathToIdJsonFormat, StringJsonFormat}
 import play.api.libs.json.Json
@@ -206,7 +207,7 @@ object Driver extends App {
     }
 
 
-    def createNewTargetNodeAndContinue(commandInvocation: CommandInvocation[BrowseTargetNodesCommand, Seq[String]]) = {
+    def createNewTargetNodeAndContinue(commandInvocation: CommandInvocation[GoToTargetNodesCommand, Seq[String]]) = {
       val newTargetNode = targetNode.getOrElse(Nil) :+ format(commandInvocation.value(PartOfName))
       val withNewTargetNode = dcfs.withPath(targetForest, newTargetNode) match {case x => if(!commandInvocation.command.parameters.contains(Unrelated) || commandInvocation
         .value(Unrelated)) x else x.withRelationship(sourceForest, sourceNode, targetForest, newTargetNode)}
@@ -266,6 +267,7 @@ object Driver extends App {
     }
 
 
+    val displayTargetRoots = "(Target Roots)"
     val displaySourceNodePrefix = "(Source Node: "
     val displaySourceNodeSuffix = ")"
 
@@ -274,7 +276,8 @@ object Driver extends App {
     targetNode.foreach(x => Some(sourceSubPathAndNonEmptySelectRelatedNodes(dcfs, sourceNode, x)).filter(_.nonEmpty).foreach(y => println(display(y))))
     if(indexToChildrenOrRoots.nonEmpty) println(System.lineSeparator() + IndexedCommand.display(indexToChildrenOrRoots.mapValues(display(_, targetNode
       .getOrElse(Nil))), targetNode.map(_ => NodeTypes.Child.name).getOrElse(NodeTypes.Root.name)))
-    targetNode.foreach(x => println(System.lineSeparator() + display(x)))
+    println(System.lineSeparator() + targetNode.map(display(_)).getOrElse(displayTargetRoots))
+
     println(System.lineSeparator() + displaySourceNodePrefix + display(sourceNode) + displaySourceNodeSuffix)
 
 
@@ -293,7 +296,7 @@ object Driver extends App {
     ).filter(_._2).map(_._1)
 
 
-    val commandInvocation = BrowseTargetNodesCommands.promptUntilParsed(indexToChildrenOrRoots, without)
+    val commandInvocation = GoToTargetNodesCommands.promptUntilParsed(indexToChildrenOrRoots, without)
     log(commandInvocation)
     commandInvocation.command match {
       case GoTo => goToTargetNodes(dcfs, sourceNode, commandInvocation.indexCommandSelection)
@@ -314,7 +317,7 @@ object Driver extends App {
         goToTargetNodes(moveSubtree(indexToChildrenOrRoots, commandInvocation.value(NumberOfRootToMove), Some(commandInvocation.value(NumberOfRootToMoveInto))), sourceNode,
           targetNode)
       case Delete => goToTargetNodes(dcfs.withoutSubtree(targetForest, targetNode.get), sourceNode, targetNode.collect{case x if x.length > 1 => x.init})
-      case BrowseTargetNodesCommands.Back =>
+      case GoToTargetNodesCommands.Back =>
         if(autoSave) save(dcfs)
         dcfs
     }

@@ -1,11 +1,7 @@
-package consoleApplication
+package consoleApplication.commands
 
 import utils.commands.IndexedCommand.IndexListCommand
-import utils.commands.Parameter.ListParameter
 import utils.commands.{Command, Commands, Parameter}
-import utils.enumerated.SelfNamed
-
-import scala.util.Try
 
 object ConnectSourceNodesSelectionCommands extends Commands {
 
