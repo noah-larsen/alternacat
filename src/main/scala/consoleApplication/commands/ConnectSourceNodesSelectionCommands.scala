@@ -12,6 +12,12 @@ object ConnectSourceNodesSelectionCommands extends Commands {
   object SelectAll extends ConnectSourceNodesSelectionCommand(specifiedLetterName = Some('a'))
   object Back extends ConnectSourceNodesSelectionCommand
 
+  override protected def help: (ConnectSourceNodesSelectionCommand) => String = {
+    case SelectNodes => ""
+    case SelectAll => ""
+    case Back => ""
+  }
+
 
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[ConnectSourceNodesSelectionCommands.type], classOf[ConnectSourceNodesSelectionCommand])
 

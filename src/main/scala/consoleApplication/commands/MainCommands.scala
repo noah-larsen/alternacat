@@ -20,6 +20,14 @@ object MainCommands extends Commands {
   object MaxFinishedValue1To5 extends ValueParameter(x => Try(x.toInt).filter(finishedValues.contains), Some(1))
 
 
+  override protected def help: (MainCommand) => String = {
+    case Connect => ""
+    case Browse => ""
+    case Other => new String
+    case Quit => new String
+  }
+
+
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[MainCommands.type], classOf[MainCommand])
 
 }

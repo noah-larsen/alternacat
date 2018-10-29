@@ -16,6 +16,12 @@ object OtherCommands extends Commands {
   object ForestLabel extends StringParameter
 
 
+  override protected def help: (OtherCommand) => String = {
+    case InitializeProductTaxonomy => ""
+    case Back => ""
+  }
+
+
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[OtherCommands.type], classOf[OtherCommand])
 
 }

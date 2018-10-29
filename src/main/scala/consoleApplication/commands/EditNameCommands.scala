@@ -12,6 +12,12 @@ object EditNameCommands extends Commands {
   object AbbreviationsForNamingTargetNodes extends EditNameCommand
   object Back extends EditNameCommand
 
+  override protected def help: (EditNameCommand) => String = {
+    case Edit => ""
+    case AbbreviationsForNamingTargetNodes => ""
+    case Back => ""
+  }
+
 
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[EditNameCommands.type], classOf[EditNameCommand])
 

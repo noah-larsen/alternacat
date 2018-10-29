@@ -13,6 +13,14 @@ object SearchResultCommands extends Commands {
   object Search extends SearchResultCommand(Seq(Keyword))
   object Back extends SearchResultCommand
 
+
+  override protected def help: (SearchResultCommand) => String = {
+    case GoToResultNumber => ""
+    case Search => ""
+    case Back => ""
+  }
+
+
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[SearchResultCommands.type], classOf[SearchResultCommand])
 
 }

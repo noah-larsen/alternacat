@@ -14,6 +14,16 @@ object BrowseSourceNodesCommands extends Commands {
   object EditRelatedNodes extends BrowseSourceNodesCommand
   object BackToMainMenu extends BrowseSourceNodesCommand
 
+  override protected def help: (BrowseSourceNodesCommand) => String = {
+    case GoTo =>
+      "Moves to the source node identified by the corresponding # in the displayed table. The table contains the children of any node currently in view, and the forest " +
+        "roots otherwise."
+    case GoUp => "Moves to the parent of this source node."
+    case RelatedNodes => "Displays the nodes from the target forest that are related to this source node."
+    case EditRelatedNodes => "Opens a menu containing options for editing which nodes from the target forest are related to this source node."
+    case BackToMainMenu => ""
+  }
+
 
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[BrowseSourceNodesCommands.type], classOf[BrowseSourceNodesCommand])
 

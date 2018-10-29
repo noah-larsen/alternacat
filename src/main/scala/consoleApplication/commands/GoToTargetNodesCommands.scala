@@ -34,6 +34,23 @@ object GoToTargetNodesCommands extends Commands {
   object NumberOfRootToMoveInto extends ValueParameter(x => Try(x.toInt))
 
 
+  override protected def help: (GoToTargetNodesCommand) => String = {
+    case GoTo => ""
+    case GoUp => ""
+    case SetAsRelated => ""
+    case RemoveRelatedness => ""
+    case CreateNewRelatedTargetRootNode => ""
+    case CreateNewRelatedTargetChildNode => ""
+    case CreateNewTargetChildNode => ""
+    case AbbreviationsForNamingTargetNodes => ""
+    case EditName => ""
+    case MoveChildWithinAnotherChildOrUp => ""
+    case MoveRootWithinAnotherRoot => ""
+    case Delete => ""
+    case Back => ""
+  }
+
+
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[GoToTargetNodesCommands.type], classOf[GoToTargetNodesCommand])
 
 }

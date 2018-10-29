@@ -16,32 +16,41 @@ trait Commands extends Enumerated {
   override type T = CommandType
 
 
-  def promptUntilParsed[T](indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true, leadWithNewline: Boolean = true)
-                          (implicit clearScreenUponSuccess: Boolean = true): CommandInvocation[CommandType, T] = {
+  def promptUntilParsed[T](display: String = new String, indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true,
+                           leadWithNewline: Boolean = true)(implicit clearScreenUponSuccess: Boolean = true): CommandInvocation[CommandType, T] = {
+
+      def promptUntilParsedInternal(indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true,
+                                     leadWithNewline: Boolean = true): Either[CommandInvocation[CommandType, T], CommandType => String] = {
+
+        def readLineUntilNonEmpty: String = StdIn.readLine() match {
+          case x if Option(x).forall(_.trim.isEmpty) => readLineUntilNonEmpty
+          case x => x
+        }
 
 
-    def promptUntilParsedInternal(indexCommandItems: Map[Int, T] = Map[Int, T](), without: Seq[CommandType] = Seq(), showUsage: Boolean = true,
-                                  leadWithNewline: Boolean = true): Either[CommandInvocation[CommandType, T], CommandType => String] = {
-      if(showUsage) println((if(leadWithNewline) System.lineSeparator() else new String) + usage(without))
-      def readLineUntilNonEmpty: String = StdIn.readLine() match {case x if Option(x).forall(_.trim.isEmpty) => readLineUntilNonEmpty case x => x}
-      commandInvocationOrHelp(readLineUntilNonEmpty, indexCommandItems, without).recover{case e: CommandException =>
-        println(e.message.trim + System.lineSeparator())
-        promptUntilParsedInternal(indexCommandItems, without, showUsage = false)
-      }.get
-    }
+        println(display)
+        if(showUsage) println((if (leadWithNewline) System.lineSeparator() else new String) + usage(without))
+        commandInvocationOrHelp(readLineUntilNonEmpty, indexCommandItems, without).recover { case e: CommandException =>
+          println(e.message.trim + System.lineSeparator())
+          promptUntilParsedInternal(indexCommandItems, without, showUsage = false)
+        }.get
+
+      }
 
 
-    val withoutComplete = without ++ indexedCommand.filter(_ => indexCommandItems.isEmpty).map(Seq(_)).getOrElse(Nil)
-    promptUntilParsedInternal(indexCommandItems, withoutComplete, showUsage, leadWithNewline) match {
-      case Left(commandInvocation) =>
-        if(clearScreenUponSuccess) IO.clearScreen()
-        commandInvocation
-      case Right(commandToHelpMessage) =>
-        IO.clearScreen()
-        println(commands.filter(x => commandToHelpMessage(x).nonEmpty).map(y => Display.withSpacedDashes(y.name, new String) + System.lineSeparator() + Display.indentLines(
-          Display.wordWrap(commandToHelpMessage(y))) + System.lineSeparator()).mkString(System.lineSeparator()))
-        promptUntilParsed(indexCommandItems, withoutComplete, showUsage)
-    }
+      val withoutComplete = without ++ indexedCommand.filter(_ => indexCommandItems.isEmpty).map(Seq(_)).getOrElse(Nil)
+      promptUntilParsedInternal(indexCommandItems, withoutComplete, showUsage, leadWithNewline) match {
+        case Left(commandInvocation) =>
+          if (clearScreenUponSuccess) IO.clearScreen()
+          commandInvocation
+        case Right(commandToHelpMessage_) =>
+          IO.clearScreen()
+          println(commands.filter(x => commandToHelpMessage_(x).nonEmpty).map(y => Display.withSpacedDashes(y.name, new String) + System.lineSeparator() + Display.indentLines(
+            Display.wordWrap(commandToHelpMessage_(y)))).mkString(System.lineSeparator() * 2) + System.lineSeparator())
+          IO.promptToPressEnterAndWait()
+          IO.clearScreen()
+          promptUntilParsed(display, indexCommandItems, withoutComplete, showUsage)
+      }
 
   }
 

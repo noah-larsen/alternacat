@@ -14,6 +14,14 @@ object EditRelatedNodesCommands extends Commands {
   object SearchTargetNodes extends EditRelatedNodeCommand(Seq(Keyword))
   object Back extends EditRelatedNodeCommand
 
+  override protected def help: (EditRelatedNodeCommand) => String = {
+    case RelatedNodes => ""
+    case Descendants => ""
+    case LookupTargetNodes => ""
+    case SearchTargetNodes => ""
+    case Back => ""
+  }
+
 
   override protected val enumeratedTypes = EnumeratedTypes(u.typeOf[EditRelatedNodesCommands.type], classOf[EditRelatedNodeCommand])
 

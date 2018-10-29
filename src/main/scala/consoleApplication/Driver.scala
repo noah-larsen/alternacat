@@ -86,8 +86,9 @@ object Driver extends App {
   private def connectSelection(dcfs: DCFS, maxFinishedProportionUnfinishedNode: Double): DCFS = {
     val header = "Unfinished Source Node With No Unfinished Ancestors"
     val indexToUnfinishedSubroots = IndexedCommand.withOneBasedIndexes(dcfs.unfinishedSubroots(sourceForest, targetForest, maxFinishedProportionUnfinishedNode))
-    println(IndexedCommand.display(indexToUnfinishedSubroots.mapValues(display(_)), header))
-    val commandInvocation = ConnectSourceNodesSelectionCommands.promptUntilParsed(indexToUnfinishedSubroots, if(indexToUnfinishedSubroots.isEmpty) Seq(SelectAll) else Nil)
+    val display_ = IndexedCommand.display(indexToUnfinishedSubroots.mapValues(display(_)), header)
+    val commandInvocation = ConnectSourceNodesSelectionCommands.promptUntilParsed(display_, indexToUnfinishedSubroots, if(indexToUnfinishedSubroots.isEmpty) Seq(
+      SelectAll) else Nil)
     log(commandInvocation)
     commandInvocation.command match {
       case SelectNodes => connectSelection(connect(dcfs, maxFinishedProportionUnfinishedNode, commandInvocation.indexListCommandSelection),
@@ -121,15 +122,15 @@ object Driver extends App {
 
   private def browseSourceNodes(dcfs: DCFS, sourceNode: Option[Seq[String]] = None): DCFS = {
     val indexToChildrenOrRoots = IndexedCommand.withOneBasedIndexes(sourceNode.map(dcfs.childPaths(sourceForest, _)).getOrElse(dcfs.rootPaths(sourceForest)).toSeq)
-    if(indexToChildrenOrRoots.nonEmpty) println(IndexedCommand.display(indexToChildrenOrRoots.mapValues(display(_, sourceNode.getOrElse(Nil))),
-      sourceNode.map(_ => NodeTypes.Child.name).getOrElse(NodeTypes.Root.name)))
-    sourceNode.foreach(x => println(System.lineSeparator() + display(x)))
+    val display_ = (if(indexToChildrenOrRoots.nonEmpty) IndexedCommand.display(indexToChildrenOrRoots.mapValues(display(_, sourceNode.getOrElse(Nil))), sourceNode.map(_ =>
+      NodeTypes.Child.name).getOrElse(NodeTypes.Root.name)) else new String) + sourceNode.map(System.lineSeparator() + System.lineSeparator() + display(_))
+      .getOrElse(new String)
     val without = Seq(
       (BrowseSourceNodesCommands.GoUp, sourceNode.isEmpty),
       (BrowseSourceNodesCommands.RelatedNodes, sourceNode.isEmpty),
       (BrowseSourceNodesCommands.EditRelatedNodes, sourceNode.isEmpty),
     ).filter(_._2).map(_._1)
-    val commandInvocation = BrowseSourceNodesCommands.promptUntilParsed(indexToChildrenOrRoots, without)
+    val commandInvocation = BrowseSourceNodesCommands.promptUntilParsed(display_, indexToChildrenOrRoots, without)
     log(commandInvocation)
     commandInvocation.command match {
       case BrowseSourceNodesCommands.GoTo => browseSourceNodes(dcfs, commandInvocation.indexCommandSelection)
@@ -142,18 +143,16 @@ object Driver extends App {
       case BrowseSourceNodesCommands.EditRelatedNodes => browseSourceNodes(editRelatedNodes(dcfs, sourceNode.get)(withNextCommand = true)._1, sourceNode)
       case BrowseSourceNodesCommands.BackToMainMenu => dcfs
     }
-
   }
 
 
   private def editRelatedNodes(dcfs: DCFS, unfinishedSubroot: Seq[String])(implicit withNextCommand: Boolean): (DCFS, Boolean) = {
-    println(display(unfinishedSubroot))
     val without = Seq(
       (Descendants, dcfs.children(sourceForest, unfinishedSubroot).isEmpty),
       (Kin, unfinishedSubroot.tail.isEmpty),
       (Next, !withNextCommand)
     ).filter(_._2).map(_._1)
-    val commandInvocation = ConnectSourceNodeCommands.promptUntilParsed(without = without)
+    val commandInvocation = ConnectSourceNodeCommands.promptUntilParsed(display(unfinishedSubroot), without = without)
     log(commandInvocation)
     commandInvocation.command match {
       case RelatedTargetNodes =>
@@ -193,10 +192,8 @@ object Driver extends App {
   private def goToTargetNodes(dcfs: DCFS, sourceNode: Seq[String], targetNode: Option[Seq[String]] = None): DCFS = {
 
     def editName: (DCFS, Seq[String]) = {
-      println("Rename nodes to change wording and correct spelling only.")
-      println("Do not rename nodes to add and remove concepts." + System.lineSeparator())
-      println(targetNode.get.last)
-      val commandInvocation = EditNameCommands.promptUntilParsed()
+      val display_ = s"Rename nodes to change wording and correct spelling only.\nDo not rename nodes to add and remove concepts.\n\n${targetNode.get.last}"
+      val commandInvocation = EditNameCommands.promptUntilParsed(display_)
       commandInvocation.command match {
         case Edit => format(commandInvocation.value(PartOfName)) match {case x => (dcfs.withLabel(targetForest, targetNode.get, x), targetNode.get.init :+ x)}
         case EditNameCommands.AbbreviationsForNamingTargetNodes =>
@@ -237,10 +234,10 @@ object Driver extends App {
         case (Some(x), Some(Some(y))) if y.startsWith(x) => Right(CannotMoveSubtreeInsideItself.getMessage)
         case (Some(x), Some(Some(y))) if dcfs.children(targetForest, y).contains(x.last) => Right(NodeWithSameNameAsSubrootAlreadyExistsAtMoveLocation.getMessage)
         case (Some(x), Some(Some(y))) =>
-          println(Display.wordWrap("When moving subtrees non-vertically, any explicit relationships that already exist along the path to the new parent from the subtree " +
-            "nodes to nodes from other forests will be removed. This means the move should only be made carefully, because if the subtree were subsequently moved again to " +
-            "a path that did not include these new ancestors, the relationships would be lost. Proceed?"))
-          val commandInvocation = YesNoCommands.promptUntilParsed()
+          val display_ = Display.wordWrap("When moving subtrees non-vertically, any explicit relationships that already exist along the path to the new parent from the " +
+            "subtree nodes to nodes from other forests will be removed. This means the move should only be made carefully, because if the subtree were subsequently moved " +
+            "again to a path that did not include these new ancestors, the relationships would be lost. Proceed?")
+          val commandInvocation = YesNoCommands.promptUntilParsed(display_)
           commandInvocation.command match {
             case Yes => Left(dcfs.withSubtreeMoved(targetForest, x, Some(y)))
             case No => Right(new String)
@@ -273,12 +270,11 @@ object Driver extends App {
 
 
     val indexToChildrenOrRoots = IndexedCommand.withOneBasedIndexes(targetNode.map(dcfs.childPaths(targetForest, _)).getOrElse(dcfs.rootPaths(targetForest)).toSeq)
-    targetNode.foreach(x => Some(sourceSubPathAndNonEmptySelectRelatedNodes(dcfs, sourceNode, x)).filter(_.nonEmpty).foreach(y => println(display(y))))
-    if(indexToChildrenOrRoots.nonEmpty) println(System.lineSeparator() + IndexedCommand.display(indexToChildrenOrRoots.mapValues(display(_, targetNode
-      .getOrElse(Nil))), targetNode.map(_ => NodeTypes.Child.name).getOrElse(NodeTypes.Root.name)))
-    println(System.lineSeparator() + targetNode.map(display(_)).getOrElse(displayTargetRoots))
-
-    println(System.lineSeparator() + displaySourceNodePrefix + display(sourceNode) + displaySourceNodeSuffix)
+    val display_ = targetNode.flatMap(x => Some(sourceSubPathAndNonEmptySelectRelatedNodes(dcfs, sourceNode, x)).filter(_.nonEmpty).map(display(_) + System.lineSeparator()))
+      .getOrElse(new String) + (if(indexToChildrenOrRoots.nonEmpty) System.lineSeparator() + IndexedCommand.display(indexToChildrenOrRoots.mapValues(display(_, targetNode
+      .getOrElse(Nil))), targetNode.map(_ => NodeTypes.Child.name).getOrElse(NodeTypes.Root.name)) + System.lineSeparator() else new String) + System.lineSeparator() + targetNode
+      .map(display(_)).getOrElse(displayTargetRoots) + System.lineSeparator() + System.lineSeparator() + displaySourceNodePrefix + display(sourceNode) +
+      displaySourceNodeSuffix + System.lineSeparator()
 
 
     val without = Seq(
@@ -296,7 +292,7 @@ object Driver extends App {
     ).filter(_._2).map(_._1)
 
 
-    val commandInvocation = GoToTargetNodesCommands.promptUntilParsed(indexToChildrenOrRoots, without)
+    val commandInvocation = GoToTargetNodesCommands.promptUntilParsed(display_, indexToChildrenOrRoots, without)
     log(commandInvocation)
     commandInvocation.command match {
       case GoTo => goToTargetNodes(dcfs, sourceNode, commandInvocation.indexCommandSelection)
@@ -331,8 +327,8 @@ object Driver extends App {
     val maxNResults = 100
     val indexToResult = IndexedCommand.withOneBasedIndexes(dcfs.resultPathToNormalizedScore(targetForest, query.mkString(keywordsSeparator),
       maxNResults).toSeq.sortBy(-_._2).map(_._1))
-    println(IndexedCommand.display(indexToResult.mapValues(display(_)), header, reverse = true))
-    val commandInvocation = SearchResultCommands.promptUntilParsed(indexToResult)
+    val display_ = IndexedCommand.display(indexToResult.mapValues(display(_)), header, reverse = true)
+    val commandInvocation = SearchResultCommands.promptUntilParsed(display_, indexToResult)
     log(commandInvocation)
     commandInvocation.command match {
       case GoToResultNumber => goToTargetNodes(dcfs, sourceForestNode, commandInvocation.indexCommandSelection)
